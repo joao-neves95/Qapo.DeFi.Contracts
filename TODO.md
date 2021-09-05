@@ -1,0 +1,45 @@
+# TODO
+
+- Products
+  - Auto-compounding LPs
+    - WBTC/WETH
+  - Auto-compounding CLPs (Composite LPs)
+  - Auto-compounding RCLPs (Rebalancing Composite LPs)
+  - DeFi money legos
+  - Colaterized Lending/Borrowing
+  - ETFs
+  - Uncolaterized Lending/Borrowing/Bonds market
+    - People can vote on the products risk level (crowdsourced risk)
+    - To read:
+      - https://www.investopedia.com/terms/b/bond.asp
+      - https://www.investopedia.com/terms/b/bond-yield.asp
+      - https://www.investopedia.com/terms/t/termtomaturity.asp
+      - https://www.investopedia.com/terms/l/loantovalue.asp
+      - https://www.investopedia.com/terms/c/creditrating.asp
+      - https://www.investopedia.com/terms/c/credit_score.asp
+      - https://www.investopedia.com/terms/c/creditquality.asp
+      - https://www.investopedia.com/terms/c/creditreport.asp
+      - https://www.investopedia.com/terms/c/convexity.asp
+- MFA (Aprove withdraw with a secondary account)
+- Strategies e.g.
+  - LPs
+    - USDT/USDC
+    - WBTC/WETH
+    - WETH/WMATIC
+    - WETH/USDC
+    - WBTC/USDC
+  - CLPs (e.g. of compositions)
+    - USDT/USDC QuickSwap + USDT/USDC SushiSwap
+    - USDT/USDC + WBTC/WETH
+    - USDT/USDC + WETH/USDC + WBTC/USDC
+    - WETH/USDC + WBTC/USDC
+  - PolyPup money lego (locked until breakeven)
+    - Deposit stable in pool (4% project fee).
+    - Harvest BALL.
+    - Sell 100% of BALL into stable until breakeven, and deposit stable somewhere.
+    - ...
+    - Sell 60% of BALL into stable, and deposit stable somewhere.
+    - Deposit BALL in (e.g.) WBTC BALL dividends.
+    - Harvest (e.g.) WBTC from BALL dividends, and deposit somwhere.
+- To Read:
+  - https://www.investopedia.com/terms/c/compoundinterest.asp
