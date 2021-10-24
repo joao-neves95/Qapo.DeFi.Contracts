@@ -12,20 +12,22 @@
 
 - In order to have a system capable of being deployed cross-chain, by lowering blockchain computing gas fees, there doesn't exist partial withdraws.
 - The user must perform the complete withdraw of principal and interest earned.
+- It is possible to give ownership of an account to another address. This action is permanent/irreversible.
 
 ## Fees
 
 - 0% deposit fee on Qapo.
 - Withdraw fee from Qapo, counting from the last deposit, that reduces after time like follows:
-    - 4% for the first 5 days
-    - 1% for the first 10 days
-    - 0.5% for the first 30 days
-    - 0% after 30 days (31st day)
-- 15% performance fee on rewards. This is to pay for things like development, servers, domain names, marketing, etc.
+  - 4% for the first 5 days.
+  - 1% for the first 10 days.
+  - 0.5% for the first 20 days.
+  - 0.25% for the first 30 days.
+  - 0% after 30 days (31st day).
+- 10% performance fee on rewards. This is to pay for things like development, servers, domain names, marketing, etc.
 
 ## Roadmap
 
 - Launch simple LP strategies.
-- Launch simple LP strategies with Qapo incentives, using a new token specific for incentives (iQapo). 
 - Launch complex strategies (i.e. DeFi legos).
+- Launch simple LP strategies with Qapo incentives, using an incentives token specific for incentives (iQapo).
 - TBA.
