@@ -8,7 +8,7 @@
   - DeFi money legos
   - Colaterized Lending/Borrowing
   - ETFs
-  - Uncolaterized Lending/Borrowing/Bonds market
+  - Uncollateralized Lending/Borrowing/Bonds market
     - People can vote on the products risk level (crowdsourced risk)
     - To read:
       - https://www.investopedia.com/terms/b/bond.asp
@@ -20,7 +20,11 @@
       - https://www.investopedia.com/terms/c/creditquality.asp
       - https://www.investopedia.com/terms/c/creditreport.asp
       - https://www.investopedia.com/terms/c/convexity.asp
-- MFA (Aprove withdraw with a secondary account)
+- MFA (Aprove operations with a secondary account)
+- Token
+  - Dynamic inflation rate (e.g.: BTC is 1.76% Y)
+    - Mintable
+    - Burnable
 - Strategies e.g.
   - LPs
     - USDT/USDC
@@ -33,7 +37,8 @@
     - USDT/USDC + WBTC/WETH
     - USDT/USDC + WETH/USDC + WBTC/USDC
     - WETH/USDC + WBTC/USDC
-  - PolyPup money lego (locked until breakeven)
+  - Auto-re-collateralizing leveraged lending/borrowing debt.
+  - PolyPup money lego strategy (locked until breakeven)
     - Deposit stable in pool (4% project fee).
     - Harvest BALL.
     - Sell 100% of BALL into stable until breakeven, and deposit stable somewhere.
