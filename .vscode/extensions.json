@@ -1,5 +1,6 @@
 {
     "recommendations": [
-        "juanblanco.solidity"
+        "juanblanco.solidity",
+        "streetsidesoftware.code-spell-checker"
     ]
 }
