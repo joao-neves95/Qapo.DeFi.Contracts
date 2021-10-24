@@ -5,4 +5,6 @@ interface IStrategy {
 
     function compound() external;
 
+    function panic() external;
+
 }
