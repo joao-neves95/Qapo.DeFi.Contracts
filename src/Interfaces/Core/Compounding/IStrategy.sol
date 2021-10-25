@@ -3,7 +3,9 @@ pragma solidity ^0.8.7;
 
 interface IStrategy {
 
-    function compound() external;
+    function getUnderlyingInvestedBalance() external view returns (uint256);
+
+    function farm() external;
 
     function panic() external;
 

@@ -3,11 +3,19 @@ pragma solidity ^0.8.7;
 
 interface IStrategyVault {
 
-    function getVaultTVL() external view returns (uint);
+    function getVaultBalance() external view returns (uint256);
 
-    function deposit() external;
+    function getVaultTvl() external view returns (uint256);
 
-    function withdraw() external;
+    function getUnderlyingAssetAddress() external view returns(address);
+
+    function getStrategyAddress() external view returns(address);
+
+    function deposit(uint256 _amount) external;
+
+    function withdraw(uint256 _amount) external;
+
+    function farm() external;
 
     function pause() external;
 

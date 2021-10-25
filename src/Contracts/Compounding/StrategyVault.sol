@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity ^0.8.7;
 
+import "../../Libraries/@openzeppelin/v4.3/token/ERC20/IERC20.sol";
+import "../../Libraries/@openzeppelin/v4.3/utils/math/SafeMath.sol";
+
 import "../../Interfaces/Core/Compounding/IStrategyVault.sol";
+import "../../Interfaces/Core/Compounding/IStrategy.sol";
 
 struct UserDeposit {
     uint blockNumber;
@@ -9,43 +13,55 @@ struct UserDeposit {
 }
 
 contract StrategyVault is IStrategyVault {
+    using SafeMath for uint256;
 
-    address private underlyingAssetAddress;
+    address underlyingAssetAddress;
 
-    mapping (address => UserDeposit) private userDeposits;
-    mapping (uint => uint) private rewardsByBlockNumber;
+    IERC20 underlyingAssetContract;
 
-    uint withdrawFee;
-    uint withdrawFeeDuration = 5 days;
+    address strategyAddress;
 
-    bool isStopped = false;
+    IStrategy strategyContract;
 
-    function getVaultTVL() override external view returns (uint) {
+    address governorAddress;
+
+    address feesReceiverAddress;
+
+    address farmerAddress;
+
+    // #region PRIVATE METHODS
+
+    function _setUnderlyingAsset(address _address) internal {
+        underlyingAssetAddress = _address;
     }
 
-    function getUserRewards() external view returns (uint) {
+    function _setStrategyContract(address _address) internal {
+        // TODO: Withdraw all the strategy funds back to the vault.
+        strategyAddress = _address;
+        strategyContract = IStrategy(_address);
     }
 
-    function deposit() external {
+    // #endregion PRIVATE METHODS
+
+    // #region PUBLIC METHODS
+
+    function getVaultBalance() public view returns (uint256) {
+        return underlyingAssetContract.balanceOf( address(this) );
     }
 
-    mapping (address => uint) withdrawRequests;
-    // Only by the user.
-    // Add request to the withdraw request list.
-    function requestwithdraw(uint _withdrawAmount) external {
-        withdrawRequests[msg.sender] += _withdrawAmount;
+    function getVaultTvl() external view returns (uint256) {
+        if (address(strategyAddress) == address(0)) {
+            // No strategy is set.
+            return getVaultBalance();
+        }
+
+        return getVaultBalance().add( strategyContract.getUnderlyingInvestedBalance() );
     }
 
-    // Only by the owner.
-    // Get amount from the requested withdraw list.
-    function withdrawTransfer(address payable _destination) external {
-        uint amount = withdrawRequests[_destination];
-        withdrawRequests[_destination] = 0;
-
-        // TODO: Review
-        address(this).call{value: amount};
+    function farm() external {
+        strategyContract.farm();
     }
 
-    function panic() external {
-    }
+    // #endregion PUBLIC METHODS
+
 }
