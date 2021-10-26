@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity ^0.8.7;
 
-interface IStrategyVault {
+interface IVault {
 
     function getVaultBalance() external view returns (uint256);
 
@@ -11,16 +11,22 @@ interface IStrategyVault {
 
     function getStrategyAddress() external view returns(address);
 
-    function deposit(uint256 _amount) external;
-
-    function withdraw(uint256 _amount) external;
-
     function farm() external;
 
     function pause() external;
 
+    function unpause() external;
+
     function panic() external;
 
-    function unPause() external;
+    function unpanic() external;
+
+    function depositAll() external;
+
+    function deposit(uint256 _amount) external;
+
+    function withdrawAll() external;
+
+    function withdraw(uint256 _amount) external;
 
 }

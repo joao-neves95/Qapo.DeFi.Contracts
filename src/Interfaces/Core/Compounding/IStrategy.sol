@@ -3,10 +3,16 @@ pragma solidity ^0.8.7;
 
 interface IStrategy {
 
-    function getUnderlyingInvestedBalance() external view returns (uint256);
+    function getNotInvestedBalance() external view returns (uint256);
+
+    function getInvestedBalance() external view returns (uint256);
+
+    function getUnclaimedRewardBalance() external view returns (uint256);
+
+    function beforeDeposit() external;
 
     function farm() external;
 
-    function panic() external;
+    function withdrawAllToVault() external;
 
 }
