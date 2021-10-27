@@ -10,9 +10,9 @@ import "../../Libraries/@openzeppelin/v4.3/utils/math/SafeMath.sol";
 
 import "../../Interfaces/Core/Compounding/IVault.sol";
 import "../../Interfaces/Core/Compounding/IStrategy.sol";
-import "../../Contracts/TranferableERC20Position.sol";
+import "../../Contracts/IndirectTranferablePositionERC20.sol";
 
-contract Vault is IVault, TranferableERC20Position, Pausable {
+contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -35,7 +35,7 @@ contract Vault is IVault, TranferableERC20Position, Pausable {
         string memory _symbol,
         address _underlyingAssetAddress,
         address _strategyAddress
-    ) TranferableERC20Position(_name, _symbol) {
+    ) IndirectTranferablePositionERC20(_name, _symbol) {
         _setUnderlyingAsset(_underlyingAssetAddress);
         _setStrategyContract(_strategyAddress);
     }
