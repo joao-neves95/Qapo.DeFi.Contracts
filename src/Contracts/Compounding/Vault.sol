@@ -36,38 +36,96 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         address _underlyingAssetAddress,
         address _strategyAddress
     ) IndirectTranferablePositionERC20(_name, _symbol) {
+        _pause();
         _setUnderlyingAsset(_underlyingAssetAddress);
-        _setStrategyContract(_strategyAddress);
+        setStrategyContract(_strategyAddress);
+        _unpause();
     }
 
     // #region EVENTS
 
     event Deposit(address indexed beneficiary, uint256 _amount);
     event Withdraw(address indexed beneficiary, uint256 _amount);
+    event StrategyUpgrade(address indexed newStrategyAddress);
 
     // #endregion EVENTS
 
     // #region PRIVATE METHODS
 
-    function _setUnderlyingAsset(address _address) internal {
+    /// @dev The underlying asset can only be set during instantiation.
+    ///      Any strategy update must use the same asset.
+    function _setUnderlyingAsset(address _address) private {
         underlyingAssetAddress = _address;
         underlyingAssetContract = IERC20(_address);
     }
 
-    function _setStrategyContract(address _address) internal {
-        // TODO: Withdraw all the strategy funds back to the vault.
-        strategyAddress = _address;
-        strategyContract = IStrategy(_address);
+    /// @dev Deploys/transfers the available underling asset to the Strategy.
+    function _deployAvailableUnderlyingToStrategy() internal whenNotPaused {
+        uint256 vaultBalance = getVaultBalance();
+
+        if (vaultBalance == 0) {
+            return;
+        }
+
+        underlyingAssetContract.safeTransfer( strategyAddress, vaultBalance );
     }
 
-    /// @notice Deploys/transfers the available underling asset to the Strategy.
-    function _deployAvailableUnderlyingToStrategy() internal {
-        underlyingAssetContract.safeTransfer( strategyAddress, getVaultBalance() );
+    function _getUnderlyingBalanceFromShares(uint _shareAmount) public view returns(uint256) {
+        return ( getVaultTvl().mul(_shareAmount) ).div(totalSupply());
     }
 
     // #endregion PRIVATE METHODS
 
+    // #region GOV METHODS
+
+    /// @dev Updates to a new underlying Strategy, retiring the previous.
+    ///      To use in case of a bug/optimisation on the Strategy.
+    function setStrategyContract(address _address) public whenPaused {
+        strategyContract.withdrawAllToVault();
+        strategyContract.retire();
+
+        strategyAddress = _address;
+        strategyContract = IStrategy(_address);
+
+        emit StrategyUpgrade(_address);
+    }
+
+    function pause() public {
+        _pause();
+    }
+
+    function unpause() public {
+        _unpause();
+    }
+
+    function panic() external {
+        pause();
+        strategyContract.withdrawAllToVault();
+        strategyContract.panic();
+    }
+
+    function unpanic() external {
+        unpause();
+    }
+
+    function untuckTokens(address _token) external {
+        require(_token != address(underlyingAssetAddress), "Invalid token. Cannot 'unstuck' the underlying asset.");
+
+        IERC20 tokenContract = IERC20(_token);
+        tokenContract.safeTransfer(msg.sender, tokenContract.balanceOf(address(this)));
+    }
+
+    // #endregion GOV METHODS
+
     // #region PUBLIC METHODS
+
+    function getUnderlyingAssetAddress() external view returns(address) {
+        return underlyingAssetAddress;
+    }
+
+    function getStrategyAddress() external view returns(address) {
+        return strategyAddress;
+    }
 
     /// @dev Gets the available underlying asset balance of this Vault, not deployed to the strategy.
     function getVaultBalance() public view returns (uint256) {
@@ -84,32 +142,14 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         return getVaultBalance().add( strategyContract.getInvestedBalance() );
     }
 
-    function getUnderlyingAssetAddress() external view returns(address) {
-        return underlyingAssetAddress;
-    }
-
-    function getStrategyAddress() external view returns(address) {
-        return strategyAddress;
+    function getHolderUnderlyingBalance() public view returns(uint256) {
+        // We will use "msg.sender" throughout instead of receiving as argument for user privacy.
+        return _getUnderlyingBalanceFromShares( balanceOf(msg.sender) );
     }
 
     function farm() external whenNotPaused {
+        _deployAvailableUnderlyingToStrategy();
         strategyContract.farm();
-    }
-
-    function pause() public {
-        _pause();
-    }
-
-    function unpause() public {
-        _unpause();
-    }
-
-    function panic() external {
-        pause();
-    }
-
-    function unpanic() external {
-        unpause();
     }
 
     function depositAll() external {
@@ -156,7 +196,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         require(totalSupply() > 0, "The vault has no shares.");
         require(_amount > 0, "The withdrawal amount must be higher than 0.");
 
-        uint256 underlyingWithdrawAmount = ( getVaultTvl().mul(_amount) ).div(totalSupply());
+        uint256 underlyingWithdrawAmount = _getUnderlyingBalanceFromShares(_amount);
         _burn(msg.sender, _amount);
 
         uint underlyingVaultBalance = getVaultBalance();
@@ -173,6 +213,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
             }
         }
 
+        // ".safeTransfer()" reverts everything in case of error.
         underlyingAssetContract.safeTransfer(msg.sender, underlyingWithdrawAmount);
         emit Withdraw(msg.sender, underlyingWithdrawAmount);
     }

@@ -3,23 +3,17 @@ pragma solidity ^0.8.7;
 
 interface IVault {
 
-    function getVaultBalance() external view returns (uint256);
-
-    function getVaultTvl() external view returns (uint256);
-
     function getUnderlyingAssetAddress() external view returns(address);
 
     function getStrategyAddress() external view returns(address);
 
+    function getVaultBalance() external view returns (uint256);
+
+    function getVaultTvl() external view returns (uint256);
+
+    function getHolderUnderlyingBalance() external view returns(uint256);
+
     function farm() external;
-
-    function pause() external;
-
-    function unpause() external;
-
-    function panic() external;
-
-    function unpanic() external;
 
     function depositAll() external;
 
