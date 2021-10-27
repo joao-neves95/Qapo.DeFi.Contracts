@@ -11,8 +11,12 @@ interface IStrategy {
 
     function beforeDeposit() external;
 
-    function farm() external;
+    function afterDeposit() external;
 
     function withdrawAllToVault() external;
+
+    function withdrawToVault(uint256 _amount) external;
+
+    function farm() external;
 
 }

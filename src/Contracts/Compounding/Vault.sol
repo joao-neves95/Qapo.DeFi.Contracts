@@ -40,6 +40,13 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         _setStrategyContract(_strategyAddress);
     }
 
+    // #region EVENTS
+
+    event Deposit(address indexed beneficiary, uint256 _amount);
+    event Withdraw(address indexed beneficiary, uint256 _amount);
+
+    // #endregion EVENTS
+
     // #region PRIVATE METHODS
 
     function _setUnderlyingAsset(address _address) internal {
@@ -105,11 +112,11 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         unpause();
     }
 
-    function depositAll() external nonReentrant {
-        _deposit( underlyingAssetContract.balanceOf(msg.sender) );
+    function depositAll() external {
+        deposit( underlyingAssetContract.balanceOf(msg.sender) );
     }
 
-    function deposit(uint256 _amount) external nonReentrant {
+    function deposit(uint256 _amount) public nonReentrant {
         _deposit( _amount );
     }
 
@@ -123,6 +130,8 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         underlyingAssetContract.safeTransferFrom(msg.sender, address(this), _amount);
         _deployAvailableUnderlyingToStrategy();
 
+        strategyContract.afterDeposit();
+
         uint256 newTvl = getVaultTvl();
         _amount = newTvl.sub(initialTvl); // Additional check for deflationary tokens.
 
@@ -132,13 +141,40 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         }
 
         _mint(msg.sender, _amount);
+        emit Deposit(msg.sender, _amount);
     }
 
     function withdrawAll() external {
+        withdraw( balanceOf(msg.sender) );
     }
 
-    function withdraw(uint256 _amount) external {
+    function withdraw(uint256 _amount) public nonReentrant {
+        _withdraw(_amount);
+    }
+
+    function _withdraw(uint256 _amount) internal {
+        require(totalSupply() > 0, "The vault has no shares.");
         require(_amount > 0, "The withdrawal amount must be higher than 0.");
+
+        uint256 underlyingWithdrawAmount = ( getVaultTvl().mul(_amount) ).div(totalSupply());
+        _burn(msg.sender, _amount);
+
+        uint underlyingVaultBalance = getVaultBalance();
+
+        if (underlyingVaultBalance < underlyingWithdrawAmount) {
+            uint amountFromStrategy = underlyingWithdrawAmount.sub(underlyingVaultBalance);
+            strategyContract.withdrawToVault(amountFromStrategy);
+
+            // Withdraw amount correction.
+            uint newUnderlyingVaultBalance = getVaultTvl();
+            uint256 balanceDifference = newUnderlyingVaultBalance.sub(underlyingVaultBalance);
+            if (balanceDifference < amountFromStrategy) {
+                underlyingWithdrawAmount = underlyingVaultBalance.add(balanceDifference);
+            }
+        }
+
+        underlyingAssetContract.safeTransfer(msg.sender, underlyingWithdrawAmount);
+        emit Withdraw(msg.sender, underlyingWithdrawAmount);
     }
 
     // #endregion PUBLIC METHODS
