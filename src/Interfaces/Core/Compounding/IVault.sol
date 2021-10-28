@@ -11,7 +11,7 @@ interface IVault {
 
     function getVaultTvl() external view returns (uint256);
 
-    function getHolderUnderlyingBalance() external view returns(uint256);
+    function getUnderlyingHolderBalance() external view returns(uint256);
 
     function farm() external;
 

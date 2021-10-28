@@ -55,12 +55,16 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
     /// @dev The underlying asset can only be set during instantiation.
     ///      Any strategy update must use the same asset.
     function _setUnderlyingAsset(address _address) private {
+        require(underlyingAssetAddress == address(0), "The underlying asset cannot be changed after instantiation.");
+
         underlyingAssetAddress = _address;
         underlyingAssetContract = IERC20(_address);
     }
 
     /// @dev Deploys/transfers the available underling asset to the Strategy.
     function _deployAvailableUnderlyingToStrategy() internal whenNotPaused {
+        require(strategyAddress != address(0), "Strategy not set, that burns!");
+
         uint256 vaultBalance = getVaultBalance();
 
         if (vaultBalance == 0) {
@@ -78,34 +82,50 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
 
     // #region GOV METHODS
 
-    /// @dev Updates to a new underlying Strategy, retiring the previous.
+    /// @dev Upgrades to a new underlying Strategy, retiring the previous.
     ///      To use in case of a bug/optimisation on the Strategy.
     function setStrategyContract(address _address) public whenPaused {
-        strategyContract.withdrawAllToVault();
-        strategyContract.retire();
+        IStrategy newStrategyContract = IStrategy(_address);
+
+        require(_address != address(0), "Strategy not defined!");
+        require(_address != strategyAddress, "Cannot upgrade to the same strategy. Everything must be atomic.");
+        require(newStrategyContract.getUnderlyingAssetAddress() == underlyingAssetAddress, "The underlying asset of the strategy must be the same as the vault.");
+
+        if (strategyAddress != address(0)) {
+            strategyContract.withdrawAllToVault();
+            strategyContract.retire();
+        }
 
         strategyAddress = _address;
         strategyContract = IStrategy(_address);
-
         emit StrategyUpgrade(_address);
     }
 
     function pause() public {
         _pause();
+
+        if (strategyAddress != address(0)) {
+            strategyContract.pause();
+        }
     }
 
     function unpause() public {
+        if (strategyAddress != address(0)) {
+            strategyContract.unpause();
+        }
+
         _unpause();
     }
 
     function panic() external {
         pause();
-        strategyContract.withdrawAllToVault();
         strategyContract.panic();
     }
 
     function unpanic() external {
+        strategyContract.unpanic();
         unpause();
+        _deployAvailableUnderlyingToStrategy();
     }
 
     function untuckTokens(address _token) external {
@@ -134,7 +154,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
 
     /// @dev Gets the Total Value Locked, taking into account both the Vault and Strategy balances.
     function getVaultTvl() public view returns (uint256) {
-        if (address(strategyAddress) == address(0)) {
+        if (strategyAddress == address(0)) {
             // No strategy is set.
             return getVaultBalance();
         }
@@ -142,7 +162,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         return getVaultBalance().add( strategyContract.getInvestedBalance() );
     }
 
-    function getHolderUnderlyingBalance() public view returns(uint256) {
+    function getUnderlyingHolderBalance() public view returns(uint256) {
         // We will use "msg.sender" throughout instead of receiving as argument for user privacy.
         return _getUnderlyingBalanceFromShares( balanceOf(msg.sender) );
     }
@@ -152,10 +172,12 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         strategyContract.farm();
     }
 
+    /// @dev The holder must first call ".approve()" for the underlying ERC20.
     function depositAll() external {
         deposit( underlyingAssetContract.balanceOf(msg.sender) );
     }
 
+    /// @dev The holder must first call ".approve()" for the underlying ERC20.
     function deposit(uint256 _amount) public nonReentrant {
         _deposit( _amount );
     }

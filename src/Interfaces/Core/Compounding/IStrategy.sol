@@ -3,6 +3,8 @@ pragma solidity ^0.8.7;
 
 interface IStrategy {
 
+    function getUnderlyingAssetAddress() external view returns(address);
+
     function getTvl() external view returns (uint256);
 
     function getNotInvestedBalance() external view returns (uint256);
@@ -15,7 +17,14 @@ interface IStrategy {
 
     function withdrawToVault(uint256 _amount) external;
 
+    function pause() external;
+
+    function unpause() external;
+
+    /// @dev Must panic. Liquidate all and withraw everything to the vault.
     function panic() external;
+
+    function unpanic() external;
 
     function retire() external;
 
