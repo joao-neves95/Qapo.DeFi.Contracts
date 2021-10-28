@@ -23,7 +23,7 @@
   - 0.5% for the first 20 days.
   - 0.25% for the first 30 days.
   - 0% after 30 days (31st day).
-- 10% performance fee on rewards. This is to pay for things like development, servers, domain names, marketing, etc.
+- 10% performance fee on rewards. This is to pay for things like gas, servers, development, domain names, etc.
 
 ## Roadmap
 
