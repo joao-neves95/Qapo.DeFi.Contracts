@@ -11,7 +11,7 @@ import "../../Libraries/@openzeppelin/v4.4/utils/math/SafeMath.sol";
 
 import "../../Interfaces/Core/Compounding/IVault.sol";
 import "../../Interfaces/Core/Compounding/IStrategy.sol";
-import "../../Contracts/IndirectTranferablePositionERC20.sol";
+import "../IndirectTranferablePositionERC20.sol";
 
 contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
     using SafeERC20 for IERC20;
