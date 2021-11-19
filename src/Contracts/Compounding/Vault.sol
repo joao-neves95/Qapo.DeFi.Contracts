@@ -13,7 +13,7 @@ import "../../Interfaces/Core/Compounding/IVault.sol";
 import "../../Interfaces/Core/Compounding/IStrategy.sol";
 import "../IndirectTranferablePositionERC20.sol";
 
-contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
+contract Vault is IVault, IndirectTranferablePositionERC20, Ownable, Pausable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -85,7 +85,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
 
     /// @dev Upgrades to a new underlying Strategy, retiring the previous.
     ///      To use in case of a bug/optimisation on the Strategy.
-    function setStrategyContract(address _address) public whenPaused {
+    function setStrategyContract(address _address) public onlyOwner whenPaused {
         IStrategy newStrategyContract = IStrategy(_address);
 
         require(_address != address(0), "Strategy not defined!");
@@ -102,7 +102,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         emit StrategyUpgrade(_address);
     }
 
-    function pause() public {
+    function pause() public onlyOwner {
         _pause();
 
         if (strategyAddress != address(0)) {
@@ -110,7 +110,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         }
     }
 
-    function unpause() public {
+    function unpause() public onlyOwner {
         if (strategyAddress != address(0)) {
             strategyContract.unpause();
         }
@@ -118,18 +118,18 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         _unpause();
     }
 
-    function panic() external {
+    function panic() external onlyOwner {
         pause();
         strategyContract.panic();
     }
 
-    function unpanic() external {
+    function unpanic() external onlyOwner {
         strategyContract.unpanic();
         unpause();
         _deployAvailableUnderlyingToStrategy();
     }
 
-    function untuckTokens(address _token) external {
+    function untuckTokens(address _token) external onlyOwner {
         require(_token != address(underlyingAssetAddress), "Invalid token. Cannot 'unstuck' the underlying asset.");
 
         IERC20 tokenContract = IERC20(_token);
@@ -199,7 +199,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Pausable {
         _amount = newTvl.sub(initialTvl); // Additional check for deflationary tokens.
 
         if (totalSupply() > 0) {
-            // From here the "amount" variable refers to the Vault shares to mint, instead of the underlying deposit amount.
+            // From here, "amount" refers to the Vault shares to mint, instead of the underlying deposit amount.
             _amount = ( _amount.mul(totalSupply()) ).div(initialTvl);
         }
 
