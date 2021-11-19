@@ -1,14 +1,17 @@
 # TODO
 
 - Products
-  - Auto-compounding LPs
+  - Auto-compounding LPs.
     - WBTC/WETH
-  - Auto-compounding CLPs (Composite LPs)
-  - Auto-compounding RCLPs (Rebalancing Composite LPs)
-  - DeFi money legos
-  - Colaterized Lending/Borrowing
-  - ETFs
-  - Uncollateralized Lending/Borrowing/Bonds market
+  - Auto-compounding RLPs (Rebalancing LPs; same underlying assets).
+  - Auto-compounding CLPs (Composite LPs; multiple underlying assets).
+  - Auto-compounding RCLPs (Rebalancing Composite LPs; multiple underlying assets).
+  - Auto-re-collateralizing leveraged lending/borrowing debt (e.g.: strategies with Aave).
+  - DeFi money legos.
+  - FIAT accounts, deposits (credit card) and withdraws.
+  - Collaterized Lending/Borrowing.
+  - ETFs.
+  - Uncollateralized Lending/Borrowing/Bonds market.
     - People can vote on the products risk level (crowdsourced risk)
     - To read:
       - https://www.investopedia.com/terms/b/bond.asp
@@ -20,31 +23,33 @@
       - https://www.investopedia.com/terms/c/creditquality.asp
       - https://www.investopedia.com/terms/c/creditreport.asp
       - https://www.investopedia.com/terms/c/convexity.asp
-- MFA (Aprove operations with a secondary account)
+- MFA (Approve operations with a secondary account)
 - Token
   - Dynamic inflation rate (e.g.: BTC is 1.76% Y)
     - Mintable
     - Burnable
 - Strategies e.g.
   - LPs
+
     - USDT/USDC
     - WBTC/WETH
     - WETH/WMATIC
     - WETH/USDC
     - WBTC/USDC
   - CLPs (e.g. of compositions)
+
     - USDT/USDC QuickSwap + USDT/USDC SushiSwap
     - USDT/USDC + WBTC/WETH
     - USDT/USDC + WETH/USDC + WBTC/USDC
     - WETH/USDC + WBTC/USDC
-  - Auto-re-collateralizing leveraged lending/borrowing debt.
-  - PolyPup money lego strategy (locked until breakeven)
+  - PolyPup money lego strategy
+
     - Deposit stable in pool (4% project fee).
     - Harvest BALL.
     - Sell 100% of BALL into stable until breakeven, and deposit stable somewhere.
     - ...
     - Sell 60% of BALL into stable, and deposit stable somewhere.
     - Deposit BALL in (e.g.) WBTC BALL dividends.
-    - Harvest (e.g.) WBTC from BALL dividends, and deposit somwhere.
+    - Harvest (e.g.) WBTC from BALL dividends, and deposit somewhere.
 - To Read:
   - https://www.investopedia.com/terms/c/compoundinterest.asp
