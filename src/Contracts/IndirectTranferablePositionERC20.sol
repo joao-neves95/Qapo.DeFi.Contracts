@@ -19,38 +19,31 @@ abstract contract IndirectTranferablePositionERC20 is IIndirectTranferablePositi
     ) ERC20(_name, _symbol) {
     }
 
-    mapping(address => uint256) private unredeemedTokens;
+    mapping(address => uint256) private unredeemedShares;
 
     function indirectPositionTransferAll(address _recipient) external {
-        IERC20 vaultToken = IERC20(address(this));
-        uint256 transferAmount = vaultToken.balanceOf(msg.sender);
-
-        indirectPositionTransfer( _recipient, transferAmount );
+        indirectPositionTransfer( _recipient, this.balanceOf(msg.sender) );
     }
 
     function indirectPositionTransfer(address _recipient, uint256 _amount) public nonReentrant {
-        IERC20 vaultToken = IERC20(address(this));
+        require(_amount > 0 && _amount <= this.balanceOf(msg.sender), "Invalid amount.");
 
-        require(_amount > 0, "The amount to transfer to the new address must be more than 0.");
-        require(_amount <= vaultToken.balanceOf(msg.sender), "Not enough balance.");
-
-        unredeemedTokens[_recipient].add(_amount);
-        vaultToken.safeTransferFrom( msg.sender, address(this), _amount );
+        unredeemedShares[_recipient].add(_amount);
+        this.transferFrom( msg.sender, address(this), _amount );
     }
 
     function getUnredeemedPositionTranferAmount() public view returns (uint256) {
-        return unredeemedTokens[msg.sender];
+        return unredeemedShares[msg.sender];
     }
 
     function redeemPositionTransfer() external nonReentrant {
-        IERC20 vaultToken = IERC20(address(this));
         uint256 unredeemedAmount = getUnredeemedPositionTranferAmount();
 
-        require(unredeemedAmount > 0, "There are no tokens to unredeem.");
-        require(unredeemedAmount <= balanceOf(address(this)), "There are not enough tokens in circulation for a redemption (???).");
+        require(unredeemedAmount > 0, "There are no tokens to redeem.");
+        require(unredeemedAmount <= balanceOf(address(this)), "Not enough shares in circulation for a redemption (???).");
 
-        unredeemedTokens[msg.sender] = 0;
-        vaultToken.safeTransfer( msg.sender, unredeemedAmount );
+        unredeemedShares[msg.sender] = 0;
+        this.transfer( msg.sender, unredeemedAmount );
     }
 
 }
