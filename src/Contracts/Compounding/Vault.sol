@@ -17,19 +17,13 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Ownable, Pausable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    address underlyingAssetAddress;
+    address private underlyingAssetAddress;
 
-    IERC20 underlyingAssetContract;
+    IERC20 private underlyingAssetContract;
 
-    address strategyAddress;
+    address private strategyAddress;
 
-    IStrategy strategyContract;
-
-    address governorAddress;
-
-    address feesReceiverAddress;
-
-    address farmerAddress;
+    IStrategy private strategyContract;
 
     constructor(
         string memory _name,
@@ -89,8 +83,8 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Ownable, Pausable {
         IStrategy newStrategyContract = IStrategy(_address);
 
         require(_address != address(0), "Strategy not defined!");
-        require(_address != strategyAddress, "Cannot upgrade to the same strategy. Everything must be atomic.");
-        require(newStrategyContract.getUnderlyingAssetAddress() == underlyingAssetAddress, "The underlying asset of the strategy must be the same as the vault.");
+        require(_address != strategyAddress, "Cannot upgrade to the same strategy.");
+        require(newStrategyContract.getUnderlyingAssetAddress() == underlyingAssetAddress, "The underlying asset must be the same.");
 
         if (strategyAddress != address(0)) {
             strategyContract.withdrawAllToVault();
@@ -184,7 +178,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Ownable, Pausable {
     }
 
     function _deposit(uint256 _amount) internal whenNotPaused {
-        require(_amount > 0, "The deposit amount must be higher than 0.");
+        require(_amount > 0, "Amount must be more than 0.");
 
         strategyContract.beforeDeposit();
 
@@ -228,7 +222,7 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Ownable, Pausable {
             uint amountFromStrategy = underlyingWithdrawAmount.sub(underlyingVaultBalance);
             strategyContract.withdrawToVault(amountFromStrategy);
 
-            // Withdraw amount correction.
+            // Deflationary tokens.
             uint newUnderlyingVaultBalance = getVaultTvl();
             uint256 balanceDifference = newUnderlyingVaultBalance.sub(underlyingVaultBalance);
             if (balanceDifference < amountFromStrategy) {
