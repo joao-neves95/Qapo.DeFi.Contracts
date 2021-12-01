@@ -23,7 +23,7 @@ abstract contract LockedStratVault is Ownable {
         return underlyingAssetAddress;
     }
 
-    function getUninvestedBalance() external view returns (uint256) {
+    function getUndeployedBalance() external view returns (uint256) {
         return underlyingAssetContract.balanceOf(address(this));
     }
 
@@ -40,11 +40,11 @@ abstract contract LockedStratVault is Ownable {
         underlyingAssetContract.safeTransferFrom( msg.sender, address(this), _amount );
     }
 
-    function withdrawAllUninvested() external {
-        this.withdrawUninvested( underlyingAssetContract.balanceOf(address(this)) );
+    function withdrawAllUndeployed() external {
+        this.withdrawUndeployed( underlyingAssetContract.balanceOf(address(this)) );
     }
 
-    function withdrawUninvested(uint256 _amount) external {
+    function withdrawUndeployed(uint256 _amount) external {
         underlyingAssetContract.safeTransfer( msg.sender, _amount );
     }
 

@@ -7,7 +7,7 @@ interface ILockedStratVault {
 
     function getUnderlyingAssetAddress() external view returns(address);
 
-    function getUninvestedBalance() external view returns (uint256);
+    function getUndeployedBalance() external view returns (uint256);
 
     function untuckTokens(address _token) external;
 
@@ -15,8 +15,8 @@ interface ILockedStratVault {
 
     function deposit(uint256 _amount) external;
 
-    function withdrawAllUninvested() external;
+    function withdrawAllUndeployed() external;
 
-    function withdrawUninvested(uint256 _amount) external;
+    function withdrawUndeployed(uint256 _amount) external;
 
 }

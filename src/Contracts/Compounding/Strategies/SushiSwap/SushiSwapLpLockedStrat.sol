@@ -8,24 +8,22 @@ import "../../LockedStratBase.sol";
 
 contract SushiSwapLpLockedStrat is LockedStratBase {
 
-    address public lpToken0;
-    address public lpToken1;
+    address internal lpToken0;
+    address internal lpToken1;
 
     constructor(
         address _underlyingAssetAddress,
-        address _rewardAssetAddress,
-        address _lpToken0,
-        address _lpToken1
+        address _rewardAssetAddress
     ) LockedStratBase(
         _underlyingAssetAddress,
         _rewardAssetAddress
     )
     {
-        lpToken0 = _lpToken0;
-        lpToken1 = _lpToken1;
+        // lpToken0 = _lpToken0;
+        // lpToken1 = _lpToken1;
     }
 
-    function getInvestedBalance() override external view returns (uint256) {
+    function getDeployedBalance() override external view returns (uint256) {
     }
 
     function deployUnderlying() override external {
@@ -35,10 +33,10 @@ contract SushiSwapLpLockedStrat is LockedStratBase {
 
     function withdraw(uint256 _amount) override external {}
 
-    function farm() override external {
+    function execute() override external {
     }
 
-    function addLiquidity() private {
+    function addLiquidity() internal {
     }
 
 }

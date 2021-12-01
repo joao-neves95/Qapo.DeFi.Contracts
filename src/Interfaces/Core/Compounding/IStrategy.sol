@@ -32,6 +32,6 @@ interface IStrategy {
 
     function afterDeposit() external;
 
-    function farm() external;
+    function execute() external;
 
 }

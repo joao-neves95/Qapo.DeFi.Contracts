@@ -7,7 +7,7 @@ interface ILockedStrat {
 
     function getTvl() external view returns (uint256);
 
-    function getInvestedBalance() external view returns (uint256);
+    function getDeployedBalance() external view returns (uint256);
 
     function retire() external;
 
@@ -17,6 +17,6 @@ interface ILockedStrat {
 
     function withdraw(uint256 _amount) external;
 
-    function farm() external;
+    function execute() external;
 
 }

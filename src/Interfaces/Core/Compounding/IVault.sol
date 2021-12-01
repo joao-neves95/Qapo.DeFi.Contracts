@@ -13,7 +13,7 @@ interface IVault {
 
     function getUnderlyingHolderBalance() external view returns(uint256);
 
-    function farm() external;
+    function execute() external;
 
     function depositAll() external;
 

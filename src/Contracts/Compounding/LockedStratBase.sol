@@ -23,10 +23,10 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function getTvl() external view returns (uint256) {
-        return this.getUninvestedBalance().add(this.getInvestedBalance());
+        return this.getUndeployedBalance().add(this.getDeployedBalance());
     }
 
-    function getInvestedBalance() virtual external view returns (uint256) {
+    function getDeployedBalance() virtual external view returns (uint256) {
         return 0;
     }
 
@@ -44,7 +44,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
 
     function withdraw(uint256 _amount) virtual external {}
 
-    function farm() virtual external {
+    function execute() virtual external {
         require(false == true);
     }
 

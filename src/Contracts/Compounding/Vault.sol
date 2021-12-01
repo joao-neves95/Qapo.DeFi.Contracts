@@ -162,9 +162,9 @@ contract Vault is IVault, IndirectTranferablePositionERC20, Ownable, Pausable {
         return _getUnderlyingBalanceFromShares( balanceOf(msg.sender) );
     }
 
-    function farm() external whenNotPaused {
+    function execute() external whenNotPaused {
         _deployAvailableUnderlyingToStrategy();
-        strategyContract.farm();
+        strategyContract.execute();
     }
 
     /// @dev The holder must first call ".approve()" for the underlying ERC20.
