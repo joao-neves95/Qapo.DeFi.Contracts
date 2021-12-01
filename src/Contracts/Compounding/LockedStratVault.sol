@@ -11,7 +11,7 @@ import "../../Interfaces/Core/Compounding/ILockedStratVault.sol";
 abstract contract LockedStratVault is Ownable {
     using SafeERC20 for IERC20;
 
-    address private underlyingAssetAddress;
+    address internal underlyingAssetAddress;
     IERC20 private underlyingAssetContract;
 
     constructor(address _underlyingAssetAddress) {
