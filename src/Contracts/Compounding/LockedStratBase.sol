@@ -14,7 +14,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     constructor(
         address _underlyingAssetAddress,
         address _rewardAssetAddress
-    ) LockedStrategyVault(_underlyingAssetAddress) {
+    ) LockedStratVault(_underlyingAssetAddress) {
         rewardAssetAddress = _rewardAssetAddress;
     }
 
