@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import "../../../Libraries/@openzeppelin/v4.4/token/ERC20/IERC20.sol";
 
-interface ILockedStrategyVault {
+interface ILockedStratVault {
 
     function getUnderlyingAssetAddress() external view returns(address);
 

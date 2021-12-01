@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity ^0.8.9;
 
-interface ILockedStrategy {
+interface ILockedStrat {
 
     function getRewardAssetAddress() external view returns(address);
 

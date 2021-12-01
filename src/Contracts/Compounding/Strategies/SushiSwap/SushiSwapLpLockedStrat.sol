@@ -4,9 +4,9 @@ pragma solidity ^0.8.9;
 // https://github.com/beefyfinance/beefy-contracts/blob/master/contracts/BIFI/strategies/Sushi/StrategyPolygonSushiLP.sol
 // https://github.com/beefyfinance/beefy-contracts/blob/master/contracts/BIFI/strategies/Sushi/StrategyArbSushiLP.sol
 
-import "../../LockedStrategyBase.sol";
+import "../../LockedStratBase.sol";
 
-contract SushiSwapLpLockedStrategy is LockedStrategyBase {
+contract SushiSwapLpLockedStrat is LockedStratBase {
 
     address public lpToken0;
     address public lpToken1;
@@ -16,7 +16,7 @@ contract SushiSwapLpLockedStrategy is LockedStrategyBase {
         address _rewardAssetAddress,
         address _lpToken0,
         address _lpToken1
-    ) LockedStrategyBase(
+    ) LockedStratBase(
         _underlyingAssetAddress,
         _rewardAssetAddress
     )

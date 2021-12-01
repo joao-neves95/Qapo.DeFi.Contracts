@@ -3,10 +3,10 @@ pragma solidity ^0.8.9;
 
 import "../../Libraries/@openzeppelin/v4.4/utils/math/SafeMath.sol";
 
-import "../../Interfaces/Core/Compounding/ILockedStrategy.sol";
-import "./LockedStrategyVault.sol";
+import "../../Interfaces/Core/Compounding/ILockedStrat.sol";
+import "./LockedStratVault.sol";
 
-abstract contract LockedStrategyBase is ILockedStrategy, LockedStrategyVault {
+abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     using SafeMath for uint256;
 
     address private rewardAssetAddress;

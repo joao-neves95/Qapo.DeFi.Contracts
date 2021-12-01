@@ -5,15 +5,10 @@ import "../../Libraries/@openzeppelin/v4.4/access/Ownable.sol";
 import "../../Libraries/@openzeppelin/v4.4/token/ERC20/IERC20.sol";
 import "../../Libraries/@openzeppelin/v4.4/token/ERC20/utils/SafeERC20.sol";
 
-import "../../Interfaces/Core/Compounding/ILockedStrategyVault.sol";
-
-struct StrategiesInfo {
-    address addr;
-    IERC20 underlyingTokenContract;
-}
+import "../../Interfaces/Core/Compounding/ILockedStratVault.sol";
 
 // TODO: Only authorized users.
-abstract contract LockedStrategyVault is Ownable {
+abstract contract LockedStratVault is Ownable {
     using SafeERC20 for IERC20;
 
     address private underlyingAssetAddress;
