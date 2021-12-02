@@ -9,7 +9,7 @@ import "./LockedStratVault.sol";
 abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     using SafeMath for uint256;
 
-    address private rewardAssetAddress;
+    address internal rewardAssetAddress;
 
     constructor(
         address _underlyingAssetAddress,

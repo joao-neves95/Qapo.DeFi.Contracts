@@ -1,5 +1,6 @@
 # TODO
 
+- Optimize.
 - Products
   - Auto-compounding LPs.
     - WBTC/WETH

@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
-pragma experimental ABIEncoderV2;
-
-// TODO: Review if this is the right version.
 
 // source: https://github.com/sushiswap/sushiswap/blob/canary/contracts/interfaces/IMiniChefV2.sol
 
@@ -19,9 +16,11 @@ interface IMiniChefV2 {
         uint64 allocPoint;
     }
 
+    // Note: pid is the index of the pool (in `.poolInfo`).
+
     function poolLength() external view returns (uint256);
-    function updatePool(uint256 pid) external returns (IMiniChefV2.PoolInfo memory);
     function userInfo(uint256 _pid, address _user) external view returns (uint256, uint256);
+    function pendingSushi(uint256 _pid, address _user) external view returns (uint256);
     function deposit(uint256 pid, uint256 amount, address to) external;
     function withdraw(uint256 pid, uint256 amount, address to) external;
     function harvest(uint256 pid, address to) external;

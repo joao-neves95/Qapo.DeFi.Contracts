@@ -23,7 +23,7 @@ abstract contract LockedStratVault is Ownable {
         return underlyingAssetAddress;
     }
 
-    function getUndeployedBalance() external view returns (uint256) {
+    function getUndeployedBalance() public view returns (uint256) {
         return underlyingAssetContract.balanceOf(address(this));
     }
 
