@@ -50,7 +50,7 @@ contract SushiSwapLpLockedStrat is LockedStratBase {
         miniChefV2 = IMiniChefV2(_chefAddress);
     }
 
-    function getDeployedBalance() override external view returns (uint256) {
+    function getDeployedBalance() override external view onlyOwner returns (uint256) {
     }
 
     function deployUnderlying() override external {
@@ -58,7 +58,7 @@ contract SushiSwapLpLockedStrat is LockedStratBase {
 
     function withdrawAll() override external {}
 
-    function withdraw(uint256 _amount) override external {}
+    function withdraw(uint256 _amount) override external onlyOwner {}
 
     function execute() override external {
         miniChefV2.harvest(poolId, address(this));

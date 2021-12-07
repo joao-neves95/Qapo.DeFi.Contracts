@@ -18,29 +18,29 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
         rewardAssetAddress = _rewardAssetAddress;
     }
 
-    function getRewardAssetAddress() external view returns(address) {
+    function getRewardAssetAddress() external view onlyOwner returns(address) {
         return rewardAssetAddress;
     }
 
-    function getTvl() external view returns (uint256) {
+    function getTvl() external view onlyOwner returns (uint256) {
         return this.getUndeployedBalance().add(this.getDeployedBalance());
     }
 
-    function getDeployedBalance() virtual external view returns (uint256) {
+    function getDeployedBalance() virtual external view onlyOwner returns (uint256) {
         return 0;
     }
 
-    function retire() external {
+    function retire() external onlyOwner {
         // ...
         address payable owner = payable(owner());
         selfdestruct(owner);
     }
 
-    function deployUnderlying() virtual external {
+    function withdrawAll() virtual external onlyOwner {}
         require(false == true);
     }
 
-    function withdrawAll() virtual external {}
+    function withdraw(uint256 _amount) virtual external onlyOwner {}
 
     function withdraw(uint256 _amount) virtual external {}
 
