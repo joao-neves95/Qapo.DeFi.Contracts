@@ -37,12 +37,8 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function withdrawAll() virtual external onlyOwner {}
-        require(false == true);
-    }
 
     function withdraw(uint256 _amount) virtual external onlyOwner {}
-
-    function withdraw(uint256 _amount) virtual external {}
 
     function execute() virtual external {
         require(false == true);

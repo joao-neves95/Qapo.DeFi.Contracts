@@ -11,8 +11,6 @@ interface ILockedStrat {
 
     function retire() external;
 
-    function deployUnderlying() external;
-
     function withdrawAll() external;
 
     function withdraw(uint256 _amount) external;
