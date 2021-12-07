@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity ^0.8.9;
 
+import "../../../../Libraries/@openzeppelin/v4.4/token/ERC20/IERC20.sol";
+import "../../../../Libraries/@openzeppelin/v4.4/utils/math/SafeMath.sol";
+
 import "../../../../Interfaces/External/IUniswapV2Pair.sol";
 import "../../../../Interfaces/External/UniswapV2RouterEth.sol";
 import "../../../../Interfaces/External/SushiSwap/IMiniChefV2.sol";
@@ -8,15 +11,19 @@ import "../../../../Interfaces/External/SushiSwap/IMiniChefV2.sol";
 import "../../LockedStratLpBase.sol";
 
 contract SushiSwapLpLockedStrat is LockedStratLpBase {
+    using SafeERC20 for IERC20;
+    using SafeMath for uint256;
 
-    IMiniChefV2 private miniChefV2;
+    address nativeAssetAddress;
     address chefAddress;
+    IMiniChefV2 private miniChefV2;
     uint256 private poolId;
 
     /// @param _poolId The index of the pool (inside IMiniChefV2's `.poolInfo`).
     constructor(
         address _underlyingAssetAddress,
         address _rewardAssetAddress,
+        address _nativeAssetAddress,
         uint256 _poolId,
         address _chefAddress,
         address _unirouterAddress
@@ -26,19 +33,41 @@ contract SushiSwapLpLockedStrat is LockedStratLpBase {
         _unirouterAddress
     )
     {
+        nativeAssetAddress = _nativeAssetAddress;
         chefAddress = _chefAddress;
         poolId = _poolId;
         miniChefV2 = IMiniChefV2(_chefAddress);
+
+        _giveAllowances();
     }
 
-    function getDeployedBalance() override external view onlyOwner returns (uint256) {
+    function getDeployedBalance() override public view onlyOwner returns (uint256) {
         (uint256 _amount, ) = IMiniChefV2(chefAddress).userInfo(poolId, address(this));
         return _amount;
     }
 
-    function withdrawAll() override external onlyOwner {}
+    function withdrawAll() override external onlyOwner {
+        IERC20 underlyingAssetContract = IERC20(underlyingAssetAddress);
+        underlyingAssetContract.safeTransfer( msg.sender, underlyingAssetContract.balanceOf(address(this)) );
 
-    function withdraw(uint256 _amount) override external onlyOwner {}
+        miniChefV2.withdrawAndHarvest(poolId, getDeployedBalance(), msg.sender);
+    }
+
+    function withdraw(uint256 _amount) override external onlyOwner {
+        IERC20 underlyingAssetContract = IERC20(underlyingAssetAddress);
+        uint256 underlyingBal = underlyingAssetContract.balanceOf(address(this));
+
+        if (underlyingBal < _amount) {
+            miniChefV2.withdraw( poolId, _amount.sub(underlyingBal), address(this) );
+            underlyingBal = underlyingAssetContract.balanceOf(address(this));
+        }
+
+        if (underlyingBal > _amount) {
+            underlyingBal = _amount;
+        }
+
+        underlyingAssetContract.safeTransfer(msg.sender, underlyingBal);
+    }
 
     function execute() override external {
         miniChefV2.harvest(poolId, address(this));
@@ -50,5 +79,30 @@ contract SushiSwapLpLockedStrat is LockedStratLpBase {
         if (underlyingBalance > 0) {
             miniChefV2.deposit(poolId, underlyingBalance, address(this));
         }
+    }
+
+    function _giveAllowances() private {
+        address uniswapV2RouterEthAddress = address(uniswapV2RouterEth);
+
+        IERC20(underlyingAssetAddress).safeApprove(chefAddress, type(uint256).max);
+
+        IERC20(rewardAssetAddress).safeApprove(uniswapV2RouterEthAddress, type(uint256).max);
+        // Needed for the SushiSwap v2 harvester.
+        IERC20(nativeAssetAddress).safeApprove(uniswapV2RouterEthAddress, type(uint256).max);
+
+        IERC20(lpToken0).safeApprove(uniswapV2RouterEthAddress, 0);
+        IERC20(lpToken0).safeApprove(uniswapV2RouterEthAddress, type(uint256).max);
+
+        IERC20(lpToken1).safeApprove(uniswapV2RouterEthAddress, 0);
+        IERC20(lpToken1).safeApprove(uniswapV2RouterEthAddress, type(uint256).max);
+    }
+
+    function _removeAllowances() private {
+        address uniswapV2RouterEthAddress = address(uniswapV2RouterEth);
+        IERC20(underlyingAssetAddress).safeApprove(chefAddress, 0);
+        IERC20(rewardAssetAddress).safeApprove(uniswapV2RouterEthAddress, 0);
+        IERC20(nativeAssetAddress).safeApprove(uniswapV2RouterEthAddress, 0);
+        IERC20(lpToken0).safeApprove(uniswapV2RouterEthAddress, 0);
+        IERC20(lpToken1).safeApprove(uniswapV2RouterEthAddress, 0);
     }
 }
