@@ -7,23 +7,17 @@ import "../../Libraries/@openzeppelin/v4.4/token/ERC20/utils/SafeERC20.sol";
 import "../../Libraries/Core/PrivatelyOwnable.sol";
 import "../../Interfaces/Core/Compounding/ILockedStratVault.sol";
 
-abstract contract LockedStratVault is PrivatelyOwnable {
+abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     using SafeERC20 for IERC20;
 
     address internal underlyingAssetAddress;
-    IERC20 private underlyingAssetContract;
 
     constructor(address _underlyingAssetAddress) {
         underlyingAssetAddress = _underlyingAssetAddress;
-        underlyingAssetContract = IERC20(_underlyingAssetAddress);
-    }
-
-    function getUnderlyingAssetAddress() external view onlyOwner returns(address) {
-        return underlyingAssetAddress;
     }
 
     function getUndeployedBalance() public view onlyOwner returns (uint256) {
-        return underlyingAssetContract.balanceOf(address(this));
+        return IERC20(underlyingAssetAddress).balanceOf(address(this));
     }
 
     function untuckTokens(address _token) external onlyOwner {
@@ -32,19 +26,15 @@ abstract contract LockedStratVault is PrivatelyOwnable {
     }
 
     function depositAll() external {
-        this.deposit( underlyingAssetContract.balanceOf(msg.sender) );
+        this.deposit( IERC20(underlyingAssetAddress).balanceOf(msg.sender) );
     }
 
     function deposit(uint256 _amount) external {
-        underlyingAssetContract.safeTransferFrom( msg.sender, address(this), _amount );
+        IERC20(underlyingAssetAddress).safeTransferFrom( msg.sender, address(this), _amount );
     }
 
     function withdrawAllUndeployed() external onlyOwner {
-        this.withdrawUndeployed( underlyingAssetContract.balanceOf(address(this)) );
-    }
-
-    function withdrawUndeployed(uint256 _amount) external onlyOwner {
-        underlyingAssetContract.safeTransfer( msg.sender, _amount );
+        IERC20(underlyingAssetAddress).safeTransfer( msg.sender, IERC20(underlyingAssetAddress).balanceOf(address(this)) );
     }
 
 }

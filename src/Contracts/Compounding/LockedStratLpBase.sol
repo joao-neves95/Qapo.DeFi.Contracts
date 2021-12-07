@@ -38,7 +38,7 @@ abstract contract LockedStratLpBase is LockedStratBase {
         rewardToLp1Route = [rewardAssetAddress, lpToken1];
     }
 
-    function addLiquidity() internal {
+    function addLiquidity() virtual internal {
         uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
 
         if (rewardBalance == 0) {

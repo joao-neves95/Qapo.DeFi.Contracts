@@ -3,8 +3,6 @@ pragma solidity ^0.8.9;
 
 interface ILockedStrat {
 
-    function getRewardAssetAddress() external view returns(address);
-
     function getTvl() external view returns (uint256);
 
     function getDeployedBalance() external view returns (uint256);
