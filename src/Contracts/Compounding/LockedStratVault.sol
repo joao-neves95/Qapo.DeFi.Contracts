@@ -34,7 +34,8 @@ abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     }
 
     function withdrawAllUndeployed() external onlyOwner {
-        IERC20(underlyingAssetAddress).safeTransfer( msg.sender, IERC20(underlyingAssetAddress).balanceOf(address(this)) );
+        IERC20 underlyingAssetContract = IERC20(underlyingAssetAddress);
+        underlyingAssetContract.safeTransfer( msg.sender, underlyingAssetContract.balanceOf(address(this)) );
     }
 
 }
