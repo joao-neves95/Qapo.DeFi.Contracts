@@ -7,6 +7,12 @@ interface ILockedStrat {
 
     function getDeployedBalance() external view returns (uint256);
 
+    function getPendingRewardAmount() external view returns (uint256);
+
+    function panic() external;
+
+    function unpanic() external;
+
     function retire() external;
 
     function withdrawAll() external;

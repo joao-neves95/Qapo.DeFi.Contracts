@@ -15,6 +15,8 @@ contract SushiSwapLpLockedStrat is LockedStratLpBase {
     using SafeMath for uint256;
 
     address nativeAssetAddress;
+    address[] private nativeToRewardRoute;
+
     address chefAddress;
     IMiniChefV2 private miniChefV2;
     uint256 private poolId;
@@ -34,16 +36,38 @@ contract SushiSwapLpLockedStrat is LockedStratLpBase {
     )
     {
         nativeAssetAddress = _nativeAssetAddress;
+        nativeToRewardRoute = [_nativeAssetAddress, _rewardAssetAddress];
+
         chefAddress = _chefAddress;
-        poolId = _poolId;
         miniChefV2 = IMiniChefV2(_chefAddress);
+        poolId = _poolId;
 
         _giveAllowances();
     }
 
-    function getDeployedBalance() override public view onlyOwner returns (uint256) {
-        (uint256 _amount, ) = IMiniChefV2(chefAddress).userInfo(poolId, address(this));
+    function getDeployedBalance() override public view returns (uint256) {
+        (uint256 _amount, ) = miniChefV2.userInfo(poolId, address(this));
         return _amount;
+    }
+
+    function getPendingRewardAmount() override external view returns (uint256) {
+        return miniChefV2.pendingSushi( poolId, address(this) );
+    }
+
+    function panic() override external onlyOwner {
+        miniChefV2.emergencyWithdraw(poolId, msg.sender);
+        _removeAllowances();
+    }
+
+    function unpanic() override external onlyOwner {
+        _giveAllowances();
+    }
+
+    function retire() override external onlyOwner {
+        miniChefV2.withdrawAndHarvest( poolId, getDeployedBalance(), msg.sender );
+
+        address payable ownerAddy = payable(msg.sender);
+        selfdestruct(ownerAddy);
     }
 
     function withdrawAll() override external onlyOwner {
@@ -72,6 +96,15 @@ contract SushiSwapLpLockedStrat is LockedStratLpBase {
     function execute() override external {
         miniChefV2.harvest(poolId, address(this));
 
+        // SushiSwap's v2 rewards in the native token too.
+        uint256 toOutput = IERC20(nativeAssetAddress).balanceOf(address(this));
+
+        if (toOutput > 0) {
+            uniswapV2RouterEth.swapExactTokensForTokens(
+                toOutput, 0, nativeToRewardRoute, address(this), block.timestamp
+            );
+        }
+
         addLiquidity();
 
         uint256 underlyingBalance = getUndeployedBalance();
@@ -99,6 +132,7 @@ contract SushiSwapLpLockedStrat is LockedStratLpBase {
 
     function _removeAllowances() private {
         address uniswapV2RouterEthAddress = address(uniswapV2RouterEth);
+
         IERC20(underlyingAssetAddress).safeApprove(chefAddress, 0);
         IERC20(rewardAssetAddress).safeApprove(uniswapV2RouterEthAddress, 0);
         IERC20(nativeAssetAddress).safeApprove(uniswapV2RouterEthAddress, 0);

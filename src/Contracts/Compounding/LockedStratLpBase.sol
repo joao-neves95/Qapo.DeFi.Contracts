@@ -59,6 +59,7 @@ abstract contract LockedStratLpBase is LockedStratBase {
             );
         }
 
+        // Mint the underlying asset (the LP).
         uniswapV2RouterEth.addLiquidity(
             lpToken0, lpToken1,
             IERC20(lpToken0).balanceOf(address(this)), IERC20(lpToken1).balanceOf(address(this)),
