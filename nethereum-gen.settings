@@ -1,0 +1,7 @@
+{
+    "projectName": "Qapo.DeFi.Contracts",
+    "namespace": "Qapo.DeFi.AutoCompounder.Infrastructure.Services.Web3",
+    "lang": 0,
+    "autoCodeGen": true,
+    "projectPath": "../Qapo.DeFi.AutoCompounder/Qapo.DeFi.AutoCompounder.Infrastructure/Services/Web3/"
+}
