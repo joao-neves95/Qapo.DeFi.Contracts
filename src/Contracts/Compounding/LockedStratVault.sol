@@ -16,24 +16,24 @@ abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
         underlyingAssetAddress = _underlyingAssetAddress;
     }
 
-    function getUndeployedBalance() public view returns (uint256) {
+    function getUndeployedBalance() override public view returns (uint256) {
         return IERC20(underlyingAssetAddress).balanceOf(address(this));
     }
 
-    function depositAll() external {
+    function depositAll() override external {
         this.deposit( IERC20(underlyingAssetAddress).balanceOf(msg.sender) );
     }
 
-    function deposit(uint256 _amount) external {
+    function deposit(uint256 _amount) override external {
         IERC20(underlyingAssetAddress).safeTransferFrom( msg.sender, address(this), _amount );
     }
 
-    function withdrawAllUndeployed() external onlyOwner {
+    function withdrawAllUndeployed() override external onlyOwner {
         IERC20 underlyingAssetContract = IERC20(underlyingAssetAddress);
         underlyingAssetContract.safeTransfer( msg.sender, underlyingAssetContract.balanceOf(address(this)) );
     }
 
-    function untuckTokens(address _token) external onlyOwner {
+    function untuckTokens(address _token) override external onlyOwner {
         IERC20 tokenContract = IERC20(_token);
         tokenContract.safeTransfer( msg.sender, tokenContract.balanceOf(address(this)) );
     }
