@@ -1,5 +1,11 @@
 # Qapo.DeFi.Contracts
 
+## Commands
+
+### Flatten
+
+E.g.: `npx flatten-sol src/Contracts/Compounding/Strategies/SushiSwap/SushiSwapLpLockedStrat.sol`
+
 ## Resources (docs)
 
 ### Uniswap Docs
