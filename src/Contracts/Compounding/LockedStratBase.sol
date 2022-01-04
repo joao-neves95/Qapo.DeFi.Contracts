@@ -37,20 +37,26 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
         underlyingAssetContract.safeTransfer( msg.sender, underlyingAssetContract.balanceOf(address(this)) );
     }
 
+    function unpanic() virtual external onlyOwner {
+        // Not yet implemented.
+        require(false == true);
+    }
+
     function retire() virtual external onlyOwner {
         address payable owner = payable(owner());
         selfdestruct(owner);
     }
 
     function withdrawAll() virtual external onlyOwner {
-        require(false == true);
+        withdrawAllUndeployed();
     }
 
     function withdraw(uint256 _amount) virtual external onlyOwner {
-        require(false == true);
+        withdrawAllUndeployed();
     }
 
     function execute() virtual external {
+        // Not yet implemented.
         require(false == true);
     }
 
