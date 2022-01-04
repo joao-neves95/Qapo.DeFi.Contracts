@@ -17,7 +17,7 @@ import "../@openzeppelin/v4.4/utils/Context.sol";
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-abstract contract Ownable is Context {
+abstract contract PrivatelyOwnable is Context {
     address private _owner;
 
     /**
