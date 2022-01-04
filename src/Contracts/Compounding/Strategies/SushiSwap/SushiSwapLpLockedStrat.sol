@@ -14,10 +14,10 @@ contract SushiSwapLpLockedStrat is LockedStratLpBase {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    address nativeAssetAddress;
+    address private nativeAssetAddress;
     address[] private nativeToRewardRoute;
 
-    address chefAddress;
+    address private chefAddress;
     IMiniChefV2 private miniChefV2;
     uint256 private poolId;
 
@@ -107,7 +107,7 @@ contract SushiSwapLpLockedStrat is LockedStratLpBase {
 
         addLiquidity();
 
-        uint256 underlyingBalance = getUndeployedBalance();
+        uint256 underlyingBalance = IERC20(underlyingAssetAddress).balanceOf(address(this));
 
         if (underlyingBalance > 0) {
             miniChefV2.deposit(poolId, underlyingBalance, address(this));
