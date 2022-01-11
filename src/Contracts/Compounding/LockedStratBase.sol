@@ -55,6 +55,11 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
         withdrawAllUndeployed();
     }
 
+    function deploy() virtual external onlyOwner {
+        // Not yet implemented.
+        require(false == true);
+    }
+
     function execute() virtual external {
         // Not yet implemented.
         require(false == true);
