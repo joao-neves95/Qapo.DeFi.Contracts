@@ -34,6 +34,8 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
 
         uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
         rewardToUnderlyingRoute = [_rewardAssetAddress, _underlyingAssetAddress];
+
+        _giveAllowances();
     }
 
     function getDeployedBalance() override virtual public view returns (uint256) {
