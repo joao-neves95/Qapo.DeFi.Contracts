@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "../../Libraries/@openzeppelin/v4.4/token/ERC20/IERC20.sol";
+import "../../Libraries/@openzeppelin/v4.4/token/ERC20/utils/SafeERC20.sol";
 import "../../Libraries/@openzeppelin/v4.4/utils/math/SafeMath.sol";
 
 import "../../Interfaces/Core/Compounding/ILockedStrat.sol";
