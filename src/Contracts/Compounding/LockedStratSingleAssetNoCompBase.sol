@@ -86,17 +86,19 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
     }
 
     function deploy() override virtual external onlyOwner {
-        IMasterChef(chefAddress).deposit( poolId, IERC20(underlyingAssetAddress).balanceOf(address(this)) );
+        uint256 bal = IERC20(underlyingAssetAddress).balanceOf( address(this) );
+
+        if (bal == 0) {
+            return;
+        }
+
+        IMasterChef(chefAddress).deposit( poolId, bal );
     }
 
     function execute() override virtual external {
         IMasterChef(chefAddress).withdraw(poolId, 0);
 
         uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
-
-        if (rewardBalance == 0) {
-            return;
-        }
 
         uniswapV2RouterEth.swapExactTokensForTokens(
             rewardBalance, 0, rewardToUnderlyingRoute, address(this), block.timestamp
