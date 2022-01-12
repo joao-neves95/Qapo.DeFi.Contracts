@@ -354,18 +354,6 @@ library SafeMath {
 
 
 
-interface IMasterChef {
-
-    function deposit(uint256 _pid, uint256 _amount) external;
-
-    function withdraw(uint256 _pid, uint256 _amount) external;
-
-    function emergencyWithdraw(uint256 _pid) external;
-
-}
-
-
-
 // Souce: https://github.com/Uniswap/v2-periphery/tree/master/contracts/interfaces
 
 interface IUniswapV2RouterEth {
@@ -464,6 +452,33 @@ interface IUniswapV2RouterEth {
 
 
 
+// Souce: https://github.com/Uniswap/v2-core/blob/master/contracts/interfaces/IUniswapV2Pair.sol
+
+interface IUniswapV2Pair {
+
+    function token0() external view returns (address);
+    function token1() external view returns (address);
+
+    function price0CumulativeLast() external view returns (uint);
+    function price1CumulativeLast() external view returns (uint);
+    function kLast() external view returns (uint);
+
+}
+
+
+
+interface IMasterChef {
+
+    function deposit(uint256 _pid, uint256 _amount) external;
+
+    function withdraw(uint256 _pid, uint256 _amount) external;
+
+    function emergencyWithdraw(uint256 _pid) external;
+
+}
+
+
+
 
 
 
@@ -474,6 +489,15 @@ interface ISalemMasterChef is IMasterChef {
     function pendingSalem(uint256 _pid, address _user) external view returns (uint256);
 
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1008,29 +1032,94 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
 }
 
 
-contract LockedStratSingleAssetNoCompBase is LockedStratBase {
-    using SafeERC20 for IERC20;
+abstract contract LockedStratLpBase is LockedStratBase {
     using SafeMath for uint256;
 
+    address internal lpToken0;
+    address internal lpToken1;
+    address[] internal rewardToLp0Route;
+    address[] internal rewardToLp1Route;
+
+    IUniswapV2Pair internal uniswapV2Pair;
     IUniswapV2RouterEth internal uniswapV2RouterEth;
+
+    constructor(
+        address _underlyingAssetAddress,
+        address _rewardAssetAddress,
+        address _unirouterAddress
+    ) LockedStratBase(
+        _underlyingAssetAddress,
+        _rewardAssetAddress
+    )
+    {
+        uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
+        uniswapV2Pair = IUniswapV2Pair(underlyingAssetAddress);
+
+        lpToken0 = uniswapV2Pair.token0();
+        lpToken1 = uniswapV2Pair.token1();
+        rewardToLp0Route = [rewardAssetAddress, lpToken0];
+        rewardToLp1Route = [rewardAssetAddress, lpToken1];
+    }
+
+    function addLiquidity() virtual internal {
+        uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
+
+        if (rewardBalance == 0) {
+            return;
+        }
+
+        uint256 halfReward = rewardBalance.div(2);
+
+        if (lpToken0 != underlyingAssetAddress) {
+            uniswapV2RouterEth.swapExactTokensForTokens(
+                halfReward, 0, rewardToLp0Route, address(this), block.timestamp
+            );
+        }
+
+        if (lpToken1 != underlyingAssetAddress) {
+            uniswapV2RouterEth.swapExactTokensForTokens(
+                halfReward, 0, rewardToLp1Route, address(this), block.timestamp
+            );
+        }
+
+        // Mint the underlying asset (the LP).
+        uniswapV2RouterEth.addLiquidity(
+            lpToken0, lpToken1,
+            IERC20(lpToken0).balanceOf(address(this)), IERC20(lpToken1).balanceOf(address(this)),
+            1, 1,
+            address(this),
+            block.timestamp
+        );
+    }
+}
+
+
+contract LockedStratLpNoCompBase is LockedStratLpBase {
+    using SafeERC20 for IERC20;
+    using SafeMath for uint256;
 
     address[] internal rewardToUnderlyingRoute;
 
     address internal chefAddress;
     uint256 internal poolId;
 
+    bool internal keepToken0;
+
     constructor(
         address _underlyingAssetAddress,
         address _rewardAssetAddress,
         address _unirouterAddress,
         address _chefAddress,
-        uint256 _poolId
-    ) LockedStratBase (
+        uint256 _poolId,
+        bool _keepToken0
+    ) LockedStratLpBase (
         _underlyingAssetAddress,
-        _rewardAssetAddress
+        _rewardAssetAddress,
+        _unirouterAddress
     ) {
         chefAddress = _chefAddress;
         poolId = _poolId;
+        keepToken0 = _keepToken0;
 
         uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
         rewardToUnderlyingRoute = [_rewardAssetAddress, _underlyingAssetAddress];
@@ -1041,15 +1130,11 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
     function getDeployedBalance() override virtual public view returns (uint256) {
         // Not yet implemented.
         require(false == true);
-
-        return 0;
     }
 
     function getPendingRewardAmount() override virtual external view returns (uint256) {
         // Not yet implemented.
         require(false == true);
-
-        return 0;
     }
 
     function panic() override virtual external onlyOwner {
@@ -1095,14 +1180,27 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
         IMasterChef(chefAddress).deposit( poolId, IERC20(underlyingAssetAddress).balanceOf( address(this) ) );
     }
 
+    /// @dev A check if there is a reward should be done off-chain.
     function execute() override virtual external {
         IMasterChef(chefAddress).withdraw(poolId, 0);
 
+        // Override to only dump the reward (no LP mint).
+        addLiquidity();
+    }
+
+    function addLiquidity() override virtual internal {
         uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
 
-        uniswapV2RouterEth.swapExactTokensForTokens(
-            rewardBalance, 0, rewardToUnderlyingRoute, address(this), block.timestamp
-        );
+        if (keepToken0) {
+            uniswapV2RouterEth.swapExactTokensForTokens(
+                rewardBalance, 0, rewardToLp0Route, address(this), block.timestamp
+            );
+
+        } else {
+            uniswapV2RouterEth.swapExactTokensForTokens(
+                rewardBalance, 0, rewardToLp1Route, address(this), block.timestamp
+            );
+        }
     }
 
     function _giveAllowances() virtual internal {
@@ -1118,21 +1216,23 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
 }
 
 
-contract LockedStratSingleAssetNoCompSalem is LockedStratSingleAssetNoCompBase {
+contract LockedStratLpNoCompSalem is LockedStratLpNoCompBase {
 
     constructor(
         address _underlyingAssetAddress,
         address _rewardAssetAddress,
         address _unirouterAddress,
         address _chefAddress,
-        uint256 _poolId
+        uint256 _poolId,
+        bool _keepToken0
     )
-    LockedStratSingleAssetNoCompBase(
+    LockedStratLpNoCompBase(
         _underlyingAssetAddress,
         _rewardAssetAddress,
         _unirouterAddress,
         _chefAddress,
-        _poolId
+        _poolId,
+        _keepToken0
     )
     {
     }
