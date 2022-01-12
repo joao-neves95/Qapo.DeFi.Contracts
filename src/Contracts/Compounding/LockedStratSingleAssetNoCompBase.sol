@@ -41,11 +41,15 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
     function getDeployedBalance() override virtual public view returns (uint256) {
         // Not yet implemented.
         require(false == true);
+
+        return 0;
     }
 
     function getPendingRewardAmount() override virtual external view returns (uint256) {
         // Not yet implemented.
         require(false == true);
+
+        return 0;
     }
 
     function panic() override virtual external onlyOwner {
@@ -65,10 +69,10 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
     }
 
     function withdrawAll() override virtual external onlyOwner {
+        IMasterChef(chefAddress).withdraw( poolId, getDeployedBalance() );
+
         IERC20 underlyingAssetContract = IERC20(underlyingAssetAddress);
         underlyingAssetContract.safeTransfer( msg.sender, underlyingAssetContract.balanceOf(address(this)) );
-
-        IMasterChef(chefAddress).withdraw( poolId, getDeployedBalance() );
     }
 
     function withdraw(uint256 _amount) override virtual external onlyOwner {
@@ -88,13 +92,7 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
     }
 
     function deploy() override virtual external onlyOwner {
-        uint256 bal = IERC20(underlyingAssetAddress).balanceOf( address(this) );
-
-        if (bal == 0) {
-            return;
-        }
-
-        IMasterChef(chefAddress).deposit( poolId, bal );
+        IMasterChef(chefAddress).deposit( poolId, IERC20(underlyingAssetAddress).balanceOf( address(this) ) );
     }
 
     function execute() override virtual external {
