@@ -39,8 +39,8 @@ abstract contract IndirectTranferablePositionERC20 is IIndirectTranferablePositi
     function redeemPositionTransfer() external nonReentrant {
         uint256 unredeemedAmount = unredeemedShares[msg.sender];
 
-        require(unredeemedAmount > 0, "There are no tokens to redeem.");
-        require(unredeemedAmount <= balanceOf(address(this)), "Not enough shares in circulation (???).");
+        require(unredeemedAmount > 0, "No tokens to redeem.");
+        require(unredeemedAmount <= balanceOf(address(this)), "Not enough shares.");
 
         unredeemedShares[msg.sender] = 0;
         this.transfer( msg.sender, unredeemedAmount );
