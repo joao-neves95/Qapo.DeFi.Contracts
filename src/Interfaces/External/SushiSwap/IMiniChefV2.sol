@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.11;
 
 // source: https://github.com/sushiswap/sushiswap/blob/canary/contracts/interfaces/IMiniChefV2.sol
 
