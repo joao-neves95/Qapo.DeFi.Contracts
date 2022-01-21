@@ -59,6 +59,7 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
 
     function unpanic() override virtual external onlyOwner {
         _giveAllowances();
+        deploy();
     }
 
     function retire() override virtual external onlyOwner {
@@ -91,7 +92,7 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
         underlyingAssetContract.safeTransfer( msg.sender, underlyingBal );
     }
 
-    function deploy() override virtual external onlyOwner {
+    function deploy() override virtual public onlyOwner {
         IMasterChef(chefAddress).deposit( poolId, IERC20(underlyingAssetAddress).balanceOf( address(this) ) );
     }
 
