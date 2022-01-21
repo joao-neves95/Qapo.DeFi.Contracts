@@ -103,23 +103,16 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
     function execute() override virtual external {
         IMasterChef(chefAddress).withdraw(poolId, 0);
 
-        // Override to only dump the reward (no LP mint).
         addLiquidity();
     }
 
+    /// @dev Override to only dump the reward (no LP mint).
     function addLiquidity() override virtual internal {
         uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
 
-        if (keepToken0) {
-            uniswapV2RouterEth.swapExactTokensForTokens(
-                rewardBalance, 0, rewardToLp0Route, address(this), block.timestamp
-            );
-
-        } else {
-            uniswapV2RouterEth.swapExactTokensForTokens(
-                rewardBalance, 0, rewardToLp1Route, address(this), block.timestamp
-            );
-        }
+        uniswapV2RouterEth.swapExactTokensForTokens(
+            rewardBalance, 0, keepToken0 ? rewardToLp0Route : rewardToLp1Route, address(this), block.timestamp
+        );
     }
 
     function _giveAllowances() virtual internal {
