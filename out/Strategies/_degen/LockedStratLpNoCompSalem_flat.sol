@@ -1130,11 +1130,15 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
     function getDeployedBalance() override virtual public view returns (uint256) {
         // Not yet implemented.
         require(false == true);
+
+        return 0;
     }
 
     function getPendingRewardAmount() override virtual external view returns (uint256) {
         // Not yet implemented.
         require(false == true);
+
+        return 0;
     }
 
     function panic() override virtual external onlyOwner {
@@ -1144,6 +1148,7 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
 
     function unpanic() override virtual external onlyOwner {
         _giveAllowances();
+        deploy();
     }
 
     function retire() override virtual external onlyOwner {
@@ -1176,7 +1181,7 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         underlyingAssetContract.safeTransfer( msg.sender, underlyingBal );
     }
 
-    function deploy() override virtual external onlyOwner {
+    function deploy() override virtual public onlyOwner {
         IMasterChef(chefAddress).deposit( poolId, IERC20(underlyingAssetAddress).balanceOf( address(this) ) );
     }
 
@@ -1184,23 +1189,16 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
     function execute() override virtual external {
         IMasterChef(chefAddress).withdraw(poolId, 0);
 
-        // Override to only dump the reward (no LP mint).
         addLiquidity();
     }
 
+    /// @dev Override to only dump the reward (no LP mint).
     function addLiquidity() override virtual internal {
         uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
 
-        if (keepToken0) {
-            uniswapV2RouterEth.swapExactTokensForTokens(
-                rewardBalance, 0, rewardToLp0Route, address(this), block.timestamp
-            );
-
-        } else {
-            uniswapV2RouterEth.swapExactTokensForTokens(
-                rewardBalance, 0, rewardToLp1Route, address(this), block.timestamp
-            );
-        }
+        uniswapV2RouterEth.swapExactTokensForTokens(
+            rewardBalance, 0, keepToken0 ? rewardToLp0Route : rewardToLp1Route, address(this), block.timestamp
+        );
     }
 
     function _giveAllowances() virtual internal {
