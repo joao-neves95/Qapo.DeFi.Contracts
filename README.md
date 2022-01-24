@@ -5,6 +5,7 @@
 ### Flatten
 
 E.g.: `npx flatten-sol src/Contracts/Compounding/Strategies/SushiSwap/SushiSwapLpLockedStrat.sol`
+E.g.: `npx flatten-sol src/Contracts/Compounding/Strategies/_degen/..sol`
 
 ## Resources (docs)
 
