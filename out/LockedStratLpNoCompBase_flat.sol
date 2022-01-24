@@ -83,48 +83,6 @@ interface IERC20 {
 
 
 
-
-
-interface ILockedStratVault {
-
-    function getUndeployedBalance() external view returns (uint256);
-
-    function depositAll() external;
-
-    function deposit(uint256 _amount) external;
-
-    function withdrawAllUndeployed() external;
-
-    function untuckTokens(address _token) external;
-
-}
-
-
-
-interface ILockedStrat {
-
-    function getTvl() external view returns (uint256);
-
-    function getDeployedBalance() external view returns (uint256);
-
-    function getPendingRewardAmount() external view returns (uint256);
-
-    function panic() external;
-
-    function unpanic() external;
-
-    function retire() external;
-
-    function withdrawAll() external;
-
-    function withdraw(uint256 _amount) external;
-
-    function deploy() external;
-
-    function execute() external;
-
-}
-
 // OpenZeppelin Contracts v4.4.1 (utils/math/SafeMath.sol)
 
 
@@ -476,24 +434,6 @@ interface IMasterChef {
     function emergencyWithdraw(uint256 _pid) external;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -922,6 +862,48 @@ abstract contract PrivatelyOwnable is Context {
 
 
 
+interface ILockedStratVault {
+
+    function getUndeployedBalance() external view returns (uint256);
+
+    function depositAll() external;
+
+    function deposit(uint256 _amount) external;
+
+    function withdrawAllUndeployed() external;
+
+    function untuckTokens(address _token) external;
+
+}
+
+
+
+interface ILockedStrat {
+
+    function getTvl() external view returns (uint256);
+
+    function getDeployedBalance() external view returns (uint256);
+
+    function getPendingRewardAmount() external view returns (uint256);
+
+    function panic() external;
+
+    function unpanic() external;
+
+    function retire() external;
+
+    function withdrawAll() external;
+
+    function withdraw(uint256 _amount) external;
+
+    function deploy() external;
+
+    function execute() external;
+
+}
+
+
+
 abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     using SafeERC20 for IERC20;
 
@@ -1197,6 +1179,3 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
     }
 
 }
-
-
-
