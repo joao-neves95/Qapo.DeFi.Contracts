@@ -48,13 +48,13 @@ abstract contract LockedStratLpBase is LockedStratBase {
         uint256 halfReward = rewardBalance.div(2);
 
         if (lpToken0 != underlyingAssetAddress) {
-            uniswapV2RouterEth.swapExactTokensForTokens(
+            uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
                 halfReward, 0, rewardToLp0Route, address(this), block.timestamp
             );
         }
 
         if (lpToken1 != underlyingAssetAddress) {
-            uniswapV2RouterEth.swapExactTokensForTokens(
+            uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
                 halfReward, 0, rewardToLp1Route, address(this), block.timestamp
             );
         }

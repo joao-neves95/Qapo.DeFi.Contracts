@@ -22,14 +22,16 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function getTvl() external view returns (uint256) {
-        return this.getUndeployedBalance().add( this.getDeployedBalance() );
+        return getUndeployedBalance().add( getDeployedBalance() );
     }
 
-    function getDeployedBalance() virtual external view returns (uint256) {
+    function getDeployedBalance() virtual public view returns (uint256) {
+        // Not yet implemented.
         return 0;
     }
 
     function getPendingRewardAmount() virtual external view returns (uint256) {
+        // Not yet implemented.
         return 0;
     }
 
@@ -39,8 +41,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function unpanic() virtual external onlyOwner {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
     function retire() virtual external onlyOwner {
@@ -57,13 +58,11 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function deploy() virtual external onlyOwner {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
     function execute() virtual external {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
 }

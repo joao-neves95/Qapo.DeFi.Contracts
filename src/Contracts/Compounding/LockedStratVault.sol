@@ -21,10 +21,10 @@ abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     }
 
     function depositAll() override external {
-        this.deposit( IERC20(underlyingAssetAddress).balanceOf(msg.sender) );
+        deposit( IERC20(underlyingAssetAddress).balanceOf(msg.sender) );
     }
 
-    function deposit(uint256 _amount) override external {
+    function deposit(uint256 _amount) override public {
         IERC20(underlyingAssetAddress).safeTransferFrom( msg.sender, address(this), _amount );
     }
 

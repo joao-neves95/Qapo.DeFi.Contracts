@@ -38,17 +38,12 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
         _giveAllowances();
     }
 
-    function getDeployedBalance() override virtual public view returns (uint256) {
-        // Not yet implemented.
-        require(false == true);
-
-        return 0;
+    function getDeployedBalance() override virtual public view returns (uint256 amount) {
+        (amount, ) = IMasterChef(chefAddress).userInfo(poolId, address(this));
     }
 
     function getPendingRewardAmount() override virtual external view returns (uint256) {
         // Not yet implemented.
-        require(false == true);
-
         return 0;
     }
 
@@ -64,9 +59,9 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
 
     function retire() override virtual external onlyOwner {
         IMasterChef(chefAddress).withdraw( poolId, getDeployedBalance() );
+        withdrawAllUndeployed();
 
-        address payable ownerAddy = payable(msg.sender);
-        selfdestruct(ownerAddy);
+        selfdestruct(payable(msg.sender));
     }
 
     function withdrawAll() override virtual external onlyOwner {
@@ -97,12 +92,14 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
     }
 
     function execute() override virtual external {
-        IMasterChef(chefAddress).withdraw(poolId, 0);
+        IMasterChef(chefAddress).withdraw( poolId, 0 );
 
-        uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
-
-        uniswapV2RouterEth.swapExactTokensForTokens(
-            rewardBalance, 0, rewardToUnderlyingRoute, address(this), block.timestamp
+        uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            IERC20(rewardAssetAddress).balanceOf(address(this)),
+            0,
+            rewardToUnderlyingRoute,
+            address(this),
+            block.timestamp
         );
     }
 

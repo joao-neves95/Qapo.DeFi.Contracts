@@ -41,17 +41,12 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         _giveAllowances();
     }
 
-    function getDeployedBalance() override virtual public view returns (uint256) {
-        // Not yet implemented.
-        require(false == true);
-
-        return 0;
+    function getDeployedBalance() override virtual public view returns (uint256 amount) {
+        (amount, ) = IMasterChef(chefAddress).userInfo(poolId, address(this));
     }
 
     function getPendingRewardAmount() override virtual external view returns (uint256) {
         // Not yet implemented.
-        require(false == true);
-
         return 0;
     }
 
@@ -67,9 +62,9 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
 
     function retire() override virtual external onlyOwner {
         IMasterChef(chefAddress).withdraw( poolId, getDeployedBalance() );
+        withdrawAllUndeployed();
 
-        address payable ownerAddy = payable(msg.sender);
-        selfdestruct(ownerAddy);
+        selfdestruct(payable(msg.sender));
     }
 
     function withdrawAll() override virtual external onlyOwner {
@@ -101,17 +96,19 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
 
     /// @dev A check if there is a reward should be done off-chain.
     function execute() override virtual external {
-        IMasterChef(chefAddress).withdraw(poolId, 0);
-
         addLiquidity();
     }
 
     /// @dev Override to only dump the reward (no LP mint).
     function addLiquidity() override virtual internal {
-        uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
+        IMasterChef(chefAddress).withdraw( poolId, 0 );
 
-        uniswapV2RouterEth.swapExactTokensForTokens(
-            rewardBalance, 0, keepToken0 ? rewardToLp0Route : rewardToLp1Route, address(this), block.timestamp
+        uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            IERC20(rewardAssetAddress).balanceOf(address(this)),
+            0,
+            keepToken0 ? rewardToLp0Route : rewardToLp1Route,
+            address(this),
+            block.timestamp
         );
     }
 
