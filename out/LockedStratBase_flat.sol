@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// OpenZeppelin Contracts v4.4.1 (token/ERC20/IERC20.sol)
-
 pragma solidity ^0.8.11;
+
+// OpenZeppelin Contracts v4.4.1 (token/ERC20/IERC20.sol)
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -795,10 +795,10 @@ abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     }
 
     function depositAll() override external {
-        this.deposit( IERC20(underlyingAssetAddress).balanceOf(msg.sender) );
+        deposit( IERC20(underlyingAssetAddress).balanceOf(msg.sender) );
     }
 
-    function deposit(uint256 _amount) override external {
+    function deposit(uint256 _amount) override public {
         IERC20(underlyingAssetAddress).safeTransferFrom( msg.sender, address(this), _amount );
     }
 
@@ -829,14 +829,16 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function getTvl() external view returns (uint256) {
-        return this.getUndeployedBalance().add( this.getDeployedBalance() );
+        return getUndeployedBalance().add( getDeployedBalance() );
     }
 
-    function getDeployedBalance() virtual external view returns (uint256) {
+    function getDeployedBalance() virtual public view returns (uint256) {
+        // Not yet implemented.
         return 0;
     }
 
     function getPendingRewardAmount() virtual external view returns (uint256) {
+        // Not yet implemented.
         return 0;
     }
 
@@ -846,8 +848,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function unpanic() virtual external onlyOwner {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
     function retire() virtual external onlyOwner {
@@ -864,13 +865,11 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function deploy() virtual external onlyOwner {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
     function execute() virtual external {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
 }

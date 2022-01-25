@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (token/ERC20/IERC20.sol)
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity ^0.8.11;
+
+// OpenZeppelin Contracts v4.4.1 (token/ERC20/IERC20.sol)
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -80,7 +81,6 @@ interface IERC20 {
      */
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
-
 
 
 // OpenZeppelin Contracts v4.4.1 (utils/math/SafeMath.sol)
@@ -427,6 +427,8 @@ interface IUniswapV2Pair {
 
 interface IMasterChef {
 
+    function userInfo(uint256 _pid, address _user) external view returns (uint256, uint256);
+
     function deposit(uint256 _pid, uint256 _amount) external;
 
     function withdraw(uint256 _pid, uint256 _amount) external;
@@ -436,11 +438,7 @@ interface IMasterChef {
 }
 
 
-
-
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/utils/SafeERC20.sol)
-
-
 
 
 
@@ -861,7 +859,6 @@ abstract contract PrivatelyOwnable is Context {
 }
 
 
-
 interface ILockedStratVault {
 
     function getUndeployedBalance() external view returns (uint256);
@@ -903,7 +900,6 @@ interface ILockedStrat {
 }
 
 
-
 abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     using SafeERC20 for IERC20;
 
@@ -918,10 +914,10 @@ abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     }
 
     function depositAll() override external {
-        this.deposit( IERC20(underlyingAssetAddress).balanceOf(msg.sender) );
+        deposit( IERC20(underlyingAssetAddress).balanceOf(msg.sender) );
     }
 
-    function deposit(uint256 _amount) override external {
+    function deposit(uint256 _amount) override public {
         IERC20(underlyingAssetAddress).safeTransferFrom( msg.sender, address(this), _amount );
     }
 
@@ -952,14 +948,16 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function getTvl() external view returns (uint256) {
-        return this.getUndeployedBalance().add( this.getDeployedBalance() );
+        return getUndeployedBalance().add( getDeployedBalance() );
     }
 
-    function getDeployedBalance() virtual external view returns (uint256) {
+    function getDeployedBalance() virtual public view returns (uint256) {
+        // Not yet implemented.
         return 0;
     }
 
     function getPendingRewardAmount() virtual external view returns (uint256) {
+        // Not yet implemented.
         return 0;
     }
 
@@ -969,8 +967,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function unpanic() virtual external onlyOwner {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
     function retire() virtual external onlyOwner {
@@ -987,13 +984,11 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function deploy() virtual external onlyOwner {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
     function execute() virtual external {
-        // Not yet implemented.
-        require(false == true);
+        require(false == true, "Not yet implemented");
     }
 
 }
@@ -1038,13 +1033,13 @@ abstract contract LockedStratLpBase is LockedStratBase {
         uint256 halfReward = rewardBalance.div(2);
 
         if (lpToken0 != underlyingAssetAddress) {
-            uniswapV2RouterEth.swapExactTokensForTokens(
+            uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
                 halfReward, 0, rewardToLp0Route, address(this), block.timestamp
             );
         }
 
         if (lpToken1 != underlyingAssetAddress) {
-            uniswapV2RouterEth.swapExactTokensForTokens(
+            uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
                 halfReward, 0, rewardToLp1Route, address(this), block.timestamp
             );
         }
@@ -1094,17 +1089,12 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         _giveAllowances();
     }
 
-    function getDeployedBalance() override virtual public view returns (uint256) {
-        // Not yet implemented.
-        require(false == true);
-
-        return 0;
+    function getDeployedBalance() override virtual public view returns (uint256 amount) {
+        (amount, ) = IMasterChef(chefAddress).userInfo(poolId, address(this));
     }
 
     function getPendingRewardAmount() override virtual external view returns (uint256) {
         // Not yet implemented.
-        require(false == true);
-
         return 0;
     }
 
@@ -1120,9 +1110,9 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
 
     function retire() override virtual external onlyOwner {
         IMasterChef(chefAddress).withdraw( poolId, getDeployedBalance() );
+        withdrawAllUndeployed();
 
-        address payable ownerAddy = payable(msg.sender);
-        selfdestruct(ownerAddy);
+        selfdestruct(payable(msg.sender));
     }
 
     function withdrawAll() override virtual external onlyOwner {
@@ -1154,17 +1144,19 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
 
     /// @dev A check if there is a reward should be done off-chain.
     function execute() override virtual external {
-        IMasterChef(chefAddress).withdraw(poolId, 0);
-
         addLiquidity();
     }
 
     /// @dev Override to only dump the reward (no LP mint).
     function addLiquidity() override virtual internal {
-        uint256 rewardBalance = IERC20(rewardAssetAddress).balanceOf(address(this));
+        IMasterChef(chefAddress).withdraw( poolId, 0 );
 
-        uniswapV2RouterEth.swapExactTokensForTokens(
-            rewardBalance, 0, keepToken0 ? rewardToLp0Route : rewardToLp1Route, address(this), block.timestamp
+        uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            IERC20(rewardAssetAddress).balanceOf(address(this)),
+            0,
+            keepToken0 ? rewardToLp0Route : rewardToLp1Route,
+            address(this),
+            block.timestamp
         );
     }
 
