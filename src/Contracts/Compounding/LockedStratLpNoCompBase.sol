@@ -8,6 +8,7 @@ import "../../Interfaces/External/IMasterChef.sol";
 
 import "./LockedStratLpBase.sol";
 
+// TODO: Make LockedStratBase the base for this contract.
 contract LockedStratLpNoCompBase is LockedStratLpBase {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
@@ -36,7 +37,12 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         keepToken0 = _keepToken0;
 
         uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
-        rewardToUnderlyingRoute = [_rewardAssetAddress, _underlyingAssetAddress];
+
+        rewardToUnderlyingRoute = [
+            _rewardAssetAddress,
+            uniswapV2RouterEth.WETH(),
+            _underlyingAssetAddress
+        ];
 
         _giveAllowances();
     }
