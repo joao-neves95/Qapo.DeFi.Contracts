@@ -852,8 +852,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function retire() virtual external onlyOwner {
-        address payable owner = payable(owner());
-        selfdestruct(owner);
+        selfdestruct(payable(msg.sender));
     }
 
     function withdrawAll() virtual external onlyOwner {

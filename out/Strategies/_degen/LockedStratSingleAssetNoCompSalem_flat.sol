@@ -987,8 +987,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function retire() virtual external onlyOwner {
-        address payable owner = payable(owner());
-        selfdestruct(owner);
+        selfdestruct(payable(msg.sender));
     }
 
     function withdrawAll() virtual external onlyOwner {
@@ -1035,7 +1034,22 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
         poolId = _poolId;
 
         uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
-        rewardToUnderlyingRoute = [_rewardAssetAddress, _underlyingAssetAddress];
+
+        if (_rewardAssetAddress == uniswapV2RouterEth.WETH()
+            || _underlyingAssetAddress == uniswapV2RouterEth.WETH()
+        ) {
+            rewardToUnderlyingRoute = [
+                _rewardAssetAddress,
+                _underlyingAssetAddress
+            ];
+
+        } else {
+            rewardToUnderlyingRoute = [
+                _rewardAssetAddress,
+                uniswapV2RouterEth.WETH(),
+                _underlyingAssetAddress
+            ];
+        }
 
         _giveAllowances();
     }

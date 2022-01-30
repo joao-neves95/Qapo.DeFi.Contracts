@@ -1011,8 +1011,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function retire() virtual external onlyOwner {
-        address payable owner = payable(owner());
-        selfdestruct(owner);
+        selfdestruct(payable(msg.sender));
     }
 
     function withdrawAll() virtual external onlyOwner {
@@ -1096,6 +1095,7 @@ abstract contract LockedStratLpBase is LockedStratBase {
 }
 
 
+// TODO: Make LockedStratBase the base for this contract.
 contract LockedStratLpNoCompBase is LockedStratLpBase {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
@@ -1124,7 +1124,22 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         keepToken0 = _keepToken0;
 
         uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
-        rewardToUnderlyingRoute = [_rewardAssetAddress, _underlyingAssetAddress];
+
+        if (_rewardAssetAddress == uniswapV2RouterEth.WETH()
+            || _underlyingAssetAddress == uniswapV2RouterEth.WETH()
+        ) {
+            rewardToUnderlyingRoute = [
+                _rewardAssetAddress,
+                _underlyingAssetAddress
+            ];
+
+        } else {
+            rewardToUnderlyingRoute = [
+                _rewardAssetAddress,
+                uniswapV2RouterEth.WETH(),
+                _underlyingAssetAddress
+            ];
+        }
 
         _giveAllowances();
     }

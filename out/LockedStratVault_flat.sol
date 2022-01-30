@@ -84,7 +84,29 @@ interface IERC20 {
 
 
 
+
+
+interface ILockedStratVault {
+
+    function getUndeployedBalance() external view returns (uint256);
+
+    function depositAll() external;
+
+    function deposit(uint256 _amount) external;
+
+    function withdrawAllUndeployed() external;
+
+    function untuckTokens(address _token) external;
+
+}
+
+
+
+
+
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/utils/SafeERC20.sol)
+
+
 
 
 
@@ -497,20 +519,6 @@ abstract contract PrivatelyOwnable is Context {
 }
 
 
-interface ILockedStratVault {
-
-    function getUndeployedBalance() external view returns (uint256);
-
-    function depositAll() external;
-
-    function deposit(uint256 _amount) external;
-
-    function withdrawAllUndeployed() external;
-
-    function untuckTokens(address _token) external;
-
-}
-
 
 abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     using SafeERC20 for IERC20;
@@ -544,3 +552,6 @@ abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     }
 
 }
+
+
+

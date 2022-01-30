@@ -3,7 +3,6 @@
 pragma solidity ^0.8.11;
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/IERC20.sol)
-
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
@@ -1014,8 +1013,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function retire() virtual external onlyOwner {
-        address payable owner = payable(owner());
-        selfdestruct(owner);
+        selfdestruct(payable(msg.sender));
     }
 
     function withdrawAll() virtual external onlyOwner {

@@ -83,6 +83,49 @@ interface IERC20 {
 }
 
 
+
+
+
+interface ILockedStratVault {
+
+    function getUndeployedBalance() external view returns (uint256);
+
+    function depositAll() external;
+
+    function deposit(uint256 _amount) external;
+
+    function withdrawAllUndeployed() external;
+
+    function untuckTokens(address _token) external;
+
+}
+
+
+
+interface ILockedStrat {
+
+    function getTvl() external view returns (uint256);
+
+    function getDeployedBalance() external view returns (uint256);
+
+    function getPendingRewardAmount() external view returns (uint256);
+
+    function panic() external;
+
+    function unpanic() external;
+
+    function retire() external;
+
+    function withdrawAll() external;
+
+    function withdraw(uint256 _amount) external;
+
+    function deploy() external;
+
+    function execute() external;
+
+}
+
 // OpenZeppelin Contracts v4.4.1 (utils/math/SafeMath.sol)
 
 
@@ -438,7 +481,29 @@ interface IMasterChef {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/utils/SafeERC20.sol)
+
+
 
 
 
@@ -859,46 +924,6 @@ abstract contract PrivatelyOwnable is Context {
 }
 
 
-interface ILockedStratVault {
-
-    function getUndeployedBalance() external view returns (uint256);
-
-    function depositAll() external;
-
-    function deposit(uint256 _amount) external;
-
-    function withdrawAllUndeployed() external;
-
-    function untuckTokens(address _token) external;
-
-}
-
-
-
-interface ILockedStrat {
-
-    function getTvl() external view returns (uint256);
-
-    function getDeployedBalance() external view returns (uint256);
-
-    function getPendingRewardAmount() external view returns (uint256);
-
-    function panic() external;
-
-    function unpanic() external;
-
-    function retire() external;
-
-    function withdrawAll() external;
-
-    function withdraw(uint256 _amount) external;
-
-    function deploy() external;
-
-    function execute() external;
-
-}
-
 
 abstract contract LockedStratVault is ILockedStratVault, PrivatelyOwnable {
     using SafeERC20 for IERC20;
@@ -971,8 +996,7 @@ abstract contract LockedStratBase is ILockedStrat, LockedStratVault {
     }
 
     function retire() virtual external onlyOwner {
-        address payable owner = payable(owner());
-        selfdestruct(owner);
+        selfdestruct(payable(msg.sender));
     }
 
     function withdrawAll() virtual external onlyOwner {
@@ -1056,6 +1080,7 @@ abstract contract LockedStratLpBase is LockedStratBase {
 }
 
 
+// TODO: Make LockedStratBase the base for this contract.
 contract LockedStratLpNoCompBase is LockedStratLpBase {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
@@ -1084,7 +1109,22 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         keepToken0 = _keepToken0;
 
         uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
-        rewardToUnderlyingRoute = [_rewardAssetAddress, _underlyingAssetAddress];
+
+        if (_rewardAssetAddress == uniswapV2RouterEth.WETH()
+            || _underlyingAssetAddress == uniswapV2RouterEth.WETH()
+        ) {
+            rewardToUnderlyingRoute = [
+                _rewardAssetAddress,
+                _underlyingAssetAddress
+            ];
+
+        } else {
+            rewardToUnderlyingRoute = [
+                _rewardAssetAddress,
+                uniswapV2RouterEth.WETH(),
+                _underlyingAssetAddress
+            ];
+        }
 
         _giveAllowances();
     }
@@ -1171,3 +1211,6 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
     }
 
 }
+
+
+
