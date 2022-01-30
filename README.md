@@ -7,6 +7,14 @@
 E.g.: `npx flatten-sol src/Contracts/Compounding/Strategies/SushiSwap/SushiSwapLpLockedStrat.sol`
 E.g.: `npx flatten-sol src/Contracts/Compounding/Strategies/_degen/..sol`
 
+```
+npx flatten-sol src/Contracts/Compounding/LockedStratVault.sol
+npx flatten-sol src/Contracts/Compounding/LockedStratBase.sol
+npx flatten-sol src/Contracts/Compounding/LockedStratLpBase.sol
+npx flatten-sol src/Contracts/Compounding/LockedStratLpNoCompBase.sol
+npx flatten-sol src/Contracts/Compounding/LockedStratSingleAssetNoCompBase.sol
+```
+
 ## Notes
 
 - Solidity max uint256: 115792089237316195423570985008687907853269984665640564039457584007913129639935
