@@ -34,11 +34,21 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
 
         uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
 
-        rewardToUnderlyingRoute = [
-            _rewardAssetAddress,
-            uniswapV2RouterEth.WETH(),
-            _underlyingAssetAddress
-        ];
+        if (_rewardAssetAddress == uniswapV2RouterEth.WETH()
+            || _underlyingAssetAddress == uniswapV2RouterEth.WETH()
+        ) {
+            rewardToUnderlyingRoute = [
+                _rewardAssetAddress,
+                _underlyingAssetAddress
+            ];
+
+        } else {
+            rewardToUnderlyingRoute = [
+                _rewardAssetAddress,
+                uniswapV2RouterEth.WETH(),
+                _underlyingAssetAddress
+            ];
+        }
 
         _giveAllowances();
     }
