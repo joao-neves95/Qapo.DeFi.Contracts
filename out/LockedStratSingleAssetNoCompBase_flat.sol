@@ -1093,7 +1093,7 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
     }
 
     function execute() override virtual external {
-        IMasterChef(chefAddress).withdraw( poolId, 0 );
+        IMasterChef(chefAddress).deposit( poolId, 0 );
 
         uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             IERC20(rewardAssetAddress).balanceOf(address(this)),
