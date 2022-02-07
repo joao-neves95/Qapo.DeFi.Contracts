@@ -1,5 +1,7 @@
 # TODO
 
+- Add configurable max gas price for each chain.
+- Add tests.
 - Optimize.
 - Products
   - Auto-compounding LPs.
