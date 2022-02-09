@@ -4,21 +4,23 @@ pragma solidity ^0.8.11;
 import "../../Libraries/@openzeppelin/v4.4/token/ERC20/IERC20.sol";
 import "../../Libraries/@openzeppelin/v4.4/utils/math/SafeMath.sol";
 import "../../Interfaces/External/UniswapV2RouterEth.sol";
+import "../../Interfaces/External/IUniswapV2Pair.sol";
 import "../../Interfaces/External/IMasterChef.sol";
 
-import "./LockedStratLpBase.sol";
+import "./LockedStratBase.sol";
 
-// TODO: Make LockedStratBase the base for this contract.
-contract LockedStratLpNoCompBase is LockedStratLpBase {
+contract LockedStratLpNoCompBase is LockedStratBase {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    address[] internal rewardToUnderlyingRoute;
+    address[] internal rewardToKeepTokenRoute;
 
     address internal chefAddress;
     uint256 internal poolId;
 
-    bool internal keepToken0;
+    address internal keepTokenAddress;
+
+    IUniswapV2RouterEth internal uniswapV2RouterEth;
 
     constructor(
         address _underlyingAssetAddress,
@@ -27,30 +29,32 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         address _chefAddress,
         uint256 _poolId,
         bool _keepToken0
-    ) LockedStratLpBase (
+    ) LockedStratBase (
         _underlyingAssetAddress,
-        _rewardAssetAddress,
-        _unirouterAddress
+        _rewardAssetAddress
     ) {
         chefAddress = _chefAddress;
         poolId = _poolId;
-        keepToken0 = _keepToken0;
+
+        keepTokenAddress = _keepToken0 ?
+            IUniswapV2Pair(underlyingAssetAddress).token0() :
+            IUniswapV2Pair(underlyingAssetAddress).token1();
 
         uniswapV2RouterEth = IUniswapV2RouterEth(_unirouterAddress);
 
         if (_rewardAssetAddress == uniswapV2RouterEth.WETH()
-            || _underlyingAssetAddress == uniswapV2RouterEth.WETH()
+            || keepTokenAddress == uniswapV2RouterEth.WETH()
         ) {
-            rewardToUnderlyingRoute = [
+            rewardToKeepTokenRoute = [
                 _rewardAssetAddress,
-                _underlyingAssetAddress
+                keepTokenAddress
             ];
 
         } else {
-            rewardToUnderlyingRoute = [
+            rewardToKeepTokenRoute = [
                 _rewardAssetAddress,
                 uniswapV2RouterEth.WETH(),
-                _underlyingAssetAddress
+                keepTokenAddress
             ];
         }
 
@@ -80,6 +84,10 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         IMasterChef(chefAddress).withdraw( poolId, getDeployedBalance() );
         withdrawAllUndeployed();
 
+        // If .retire() starts failing, send some keepToken to the contract.
+        IERC20 keepTokenContract = IERC20(keepTokenAddress);
+        keepTokenContract.safeTransfer( msg.sender, keepTokenContract.balanceOf(address(this)) );
+
         selfdestruct(payable(msg.sender));
     }
 
@@ -88,6 +96,9 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
 
         IERC20 underlyingAssetContract = IERC20(underlyingAssetAddress);
         underlyingAssetContract.safeTransfer( msg.sender, underlyingAssetContract.balanceOf(address(this)) );
+
+        IERC20 keepTokenContract = IERC20(keepTokenAddress);
+        keepTokenContract.safeTransfer( msg.sender, keepTokenContract.balanceOf(address(this)) );
     }
 
     function withdraw(uint256 _amount) override virtual external onlyOwner {
@@ -104,25 +115,24 @@ contract LockedStratLpNoCompBase is LockedStratLpBase {
         }
 
         underlyingAssetContract.safeTransfer( msg.sender, underlyingBal );
+
+        // If this starts failing, send some keepToken to the contract.
+        IERC20 keepTokenContract = IERC20(keepTokenAddress);
+        keepTokenContract.safeTransfer( msg.sender, keepTokenContract.balanceOf(address(this)) );
     }
 
     function deploy() override virtual public onlyOwner {
         IMasterChef(chefAddress).deposit( poolId, IERC20(underlyingAssetAddress).balanceOf( address(this) ) );
     }
 
-    /// @dev A check if there is a reward should be done off-chain.
+    /// @dev A check to know if there is a profitable reward should be done off-chain.
     function execute() override virtual external {
-        addLiquidity();
-    }
-
-    /// @dev Override to only dump the reward (no LP mint).
-    function addLiquidity() override virtual internal {
         IMasterChef(chefAddress).withdraw( poolId, 0 );
 
         uniswapV2RouterEth.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             IERC20(rewardAssetAddress).balanceOf(address(this)),
             0,
-            keepToken0 ? rewardToLp0Route : rewardToLp1Route,
+            rewardToKeepTokenRoute,
             address(this),
             block.timestamp
         );

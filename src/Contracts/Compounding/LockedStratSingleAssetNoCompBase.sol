@@ -106,6 +106,7 @@ contract LockedStratSingleAssetNoCompBase is LockedStratBase {
         IMasterChef(chefAddress).deposit( poolId, IERC20(underlyingAssetAddress).balanceOf( address(this) ) );
     }
 
+    /// @dev A check to know if there is a profitable reward should be done off-chain.
     function execute() override virtual external {
         IMasterChef(chefAddress).withdraw( poolId, 0 );
 
