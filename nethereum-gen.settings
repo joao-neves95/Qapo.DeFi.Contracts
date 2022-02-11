@@ -2,6 +2,6 @@
     "projectName": "Qapo.DeFi.Bot.Core.Web3Services",
     "namespace": "Qapo.DeFi.Bot.Core.Web3Services",
     "lang": 0,
-    "autoCodeGen": true,
+    "autoCodeGen": false,
     "projectPath": "../Qapo.DeFi.Bot/Qapo.DeFi.Bot.Core/Web3Services/"
 }
